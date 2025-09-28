@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "618857700333",
+    "project_id": "cinematch-694fb",
+    "storage_bucket": "cinematch-694fb.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:618857700333:android:6a4460f5e86094a0f2e5e4",
+        "android_client_info": {
+          "package_name": "com.cinematch"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCorHBdl3fP4dMDuT-QeXqaGPC-Tb8iN2k"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
