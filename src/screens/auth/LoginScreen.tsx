@@ -1,21 +1,52 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
   StyleSheet,
   TouchableOpacity,
   ImageBackground,
+  Alert,
+  ActivityIndicator,
 } from 'react-native';
+import Icon from 'react-native-vector-icons/Ionicons';
 import CustomInput from '../../components/ui/inputs/CustomInput';
 import CustomButton from '../../components/ui/buttons/CustomButton';
+import { useAuth } from '../../context/AuthContext';
 
 export default function LoginScreen({ navigation }: any) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const { loginWithGoogle, loginWithEmail, isAuthenticating, error, clearError } = useAuth();
 
-  const handleLogin = () => {
-    // Navegar a las tabs (App)
-    navigation.navigate('App');
+  // Mostrar errores
+  useEffect(() => {
+    if (error) {
+      Alert.alert('Error', error, [{ text: 'OK', onPress: clearError }]);
+    }
+  }, [error, clearError]);
+
+  const handleGoogleLogin = async () => {
+    try {
+      await loginWithGoogle();
+      // La navegación se manejará automáticamente por el RootNavigator
+    } catch (err) {
+      // El error ya se muestra en el useEffect
+    }
+  };
+
+  const handleEmailLogin = async () => {
+    if (!email || !password) {
+      Alert.alert('Error', 'Por favor ingresa email y contraseña');
+      return;
+    }
+
+    try {
+      await loginWithEmail(email, password);
+      // La navegación se manejará automáticamente por el RootNavigator
+    } catch (err) {
+      // El error ya se muestra en el useEffect
+      console.error('Error en email login:', err);
+    }
   };
 
   return (
@@ -60,14 +91,40 @@ export default function LoginScreen({ navigation }: any) {
         </TouchableOpacity>
 
         <CustomButton
-          title="Login"
-          onPress={handleLogin}
+          title={isAuthenticating ? 'Iniciando sesión...' : 'Login'}
+          onPress={handleEmailLogin}
           backgroundColor="#E69CA3"
           textColor="#1A1A1A"
+          disabled={isAuthenticating}
         />
 
+        {/* Separator */}
+        <View style={styles.separatorContainer}>
+          <View style={styles.separatorLine} />
+          <Text style={styles.separatorText}>O continua con</Text>
+          <View style={styles.separatorLine} />
+        </View>
+
+        {/* Google Sign-In Button */}
+        <TouchableOpacity
+          style={styles.googleButton}
+          onPress={handleGoogleLogin}
+          disabled={isAuthenticating}
+        >
+          {isAuthenticating ? (
+            <ActivityIndicator color="#1A1A1A" />
+          ) : (
+            <>
+              <Icon name="logo-google" size={24} color="#1A1A1A" />
+              <Text style={styles.googleButtonText}>
+                Iniciar sesión con Google
+              </Text>
+            </>
+          )}
+        </TouchableOpacity>
+
         <Text style={styles.footerText}>
-          Don’t have an account?{' '}
+          Don't have an account?{' '}
           <Text
             style={styles.link}
             onPress={() => navigation.navigate('SignUp')}
@@ -146,5 +203,35 @@ const styles = StyleSheet.create({
   link: {
     color: '#E69CA3',
     fontWeight: 'bold',
+  },
+  separatorContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginVertical: 20,
+  },
+  separatorLine: {
+    flex: 1,
+    height: 1,
+    backgroundColor: '#555',
+  },
+  separatorText: {
+    color: '#aaa',
+    marginHorizontal: 10,
+    fontSize: 14,
+  },
+  googleButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#fff',
+    paddingVertical: 12,
+    borderRadius: 8,
+    marginBottom: 10,
+    gap: 10,
+  },
+  googleButtonText: {
+    color: '#1A1A1A',
+    fontSize: 16,
+    fontWeight: '600',
   },
 });

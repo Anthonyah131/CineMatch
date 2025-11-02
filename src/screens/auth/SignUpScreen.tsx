@@ -1,16 +1,61 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, ImageBackground } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  ImageBackground,
+  TouchableOpacity,
+  Alert,
+  ActivityIndicator,
+} from 'react-native';
+import Icon from 'react-native-vector-icons/Ionicons';
 import CustomInput from '../../components/ui/inputs/CustomInput';
 import CustomButton from '../../components/ui/buttons/CustomButton';
+import { useAuth } from '../../context/AuthContext';
 
 export default function SignUpScreen({ navigation }: any) {
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const { registerWithGoogle, registerWithEmail, isAuthenticating, error, clearError } = useAuth();
 
-  const handleSignUp = () => {
-    // Navegar directamente al HomeScreen
-    navigation.navigate('App');
+  // Mostrar errores
+  useEffect(() => {
+    if (error) {
+      Alert.alert('Error', error, [
+        { text: 'OK', onPress: clearError }
+      ]);
+    }
+  }, [error, clearError]);
+
+  const handleGoogleSignUp = async () => {
+    try {
+      await registerWithGoogle();
+      // La navegación se manejará automáticamente por el RootNavigator
+    } catch (err) {
+      // El error ya se muestra en el useEffect
+      console.error('Error en Google signup:', err);
+    }
+  };
+
+  const handleEmailSignUp = async () => {
+    if (!username || !email || !password) {
+      Alert.alert('Error', 'Por favor completa todos los campos');
+      return;
+    }
+
+    if (password.length < 6) {
+      Alert.alert('Error', 'La contraseña debe tener al menos 6 caracteres');
+      return;
+    }
+
+    try {
+      await registerWithEmail(email, password, username);
+      // La navegación se manejará automáticamente por el RootNavigator
+    } catch (err) {
+      // El error ya se muestra en el useEffect
+      console.error('Error en email signup:', err);
+    }
   };
 
   return (
@@ -56,11 +101,35 @@ export default function SignUpScreen({ navigation }: any) {
         />
 
         <CustomButton
-          title="Sign Up"
-          onPress={handleSignUp}
+          title={isAuthenticating ? "Creando cuenta..." : "Sign Up"}
+          onPress={handleEmailSignUp}
           backgroundColor="#E69CA3"
           textColor="#1A1A1A"
+          disabled={isAuthenticating}
         />
+
+        {/* Separator */}
+        <View style={styles.separatorContainer}>
+          <View style={styles.separatorLine} />
+          <Text style={styles.separatorText}>O regístrate con</Text>
+          <View style={styles.separatorLine} />
+        </View>
+
+        {/* Google Sign-Up Button */}
+        <TouchableOpacity
+          style={styles.googleButton}
+          onPress={handleGoogleSignUp}
+          disabled={isAuthenticating}
+        >
+          {isAuthenticating ? (
+            <ActivityIndicator color="#1A1A1A" />
+          ) : (
+            <>
+              <Icon name="logo-google" size={24} color="#1A1A1A" />
+              <Text style={styles.googleButtonText}>Registrarse con Google</Text>
+            </>
+          )}
+        </TouchableOpacity>
 
         <Text style={styles.footerText}>
           Already have an account?{' '}
@@ -136,5 +205,35 @@ const styles = StyleSheet.create({
   link: {
     color: '#E69CA3',
     fontWeight: 'bold',
+  },
+  separatorContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginVertical: 20,
+  },
+  separatorLine: {
+    flex: 1,
+    height: 1,
+    backgroundColor: '#555',
+  },
+  separatorText: {
+    color: '#aaa',
+    marginHorizontal: 10,
+    fontSize: 14,
+  },
+  googleButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#fff',
+    paddingVertical: 12,
+    borderRadius: 8,
+    marginBottom: 10,
+    gap: 10,
+  },
+  googleButtonText: {
+    color: '#1A1A1A',
+    fontSize: 16,
+    fontWeight: '600',
   },
 });

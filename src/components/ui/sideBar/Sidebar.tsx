@@ -1,18 +1,33 @@
 import React from 'react';
-import { View, Text, StyleSheet, Image, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, Image, ScrollView, ActivityIndicator } from 'react-native';
 import SidebarButton from '../buttons/SidebarButton';
+import { useAuth } from '../../../context/AuthContext';
 
 export default function Sidebar({ navigation, onClose }: any) {
+  const { user, logout, isAuthenticating } = useAuth();
+
+  const handleLogout = async () => {
+    try {
+      if (onClose) onClose();
+      await logout();
+      // La navegación se manejará automáticamente por RootNavigator
+    } catch (error) {
+      console.error('Error al cerrar sesión:', error);
+    }
+  };
+
   return (
     <View style={styles.container}>
       {/* Header */}
       <View style={styles.profileSection}>
         <Image
-          source={{ uri: 'https://i.pravatar.cc/150?img=12' }}
+          source={{ 
+            uri: user?.photoUrl || 'https://i.pravatar.cc/150?img=12' 
+          }}
           style={styles.avatar}
         />
-        <Text style={styles.username}>Kyran</Text>
-        <Text style={styles.handle}>@kyran_d</Text>
+        <Text style={styles.username}>{user?.name || 'Usuario'}</Text>
+        <Text style={styles.handle}>@{user?.email?.split('@')[0] || 'user'}</Text>
 
         <View style={styles.followRow}>
           <Text style={styles.followText}>500 Followers</Text>
@@ -82,14 +97,18 @@ export default function Sidebar({ navigation, onClose }: any) {
       </ScrollView>
 
       {/* Logout */}
-      <SidebarButton
-        title="Logout"
-        icon="log-out-outline"
-        onPress={() => {
-          if (onClose) onClose();
-          navigation.navigate('Auth');
-        }}
-      />
+      {isAuthenticating ? (
+        <View style={styles.logoutLoading}>
+          <ActivityIndicator color="#E69CA3" />
+          <Text style={styles.logoutLoadingText}>Cerrando sesión...</Text>
+        </View>
+      ) : (
+        <SidebarButton
+          title="Logout"
+          icon="log-out-outline"
+          onPress={handleLogout}
+        />
+      )}
     </View>
   );
 }
@@ -128,6 +147,17 @@ const styles = StyleSheet.create({
   },
   followText: {
     color: '#fff',
+    fontSize: 14,
+  },
+  logoutLoading: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 15,
+    gap: 10,
+  },
+  logoutLoadingText: {
+    color: '#aaa',
     fontSize: 14,
   },
 });
