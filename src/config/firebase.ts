@@ -11,8 +11,3 @@ export const firebaseConfig = {
 
 // Web Client ID for Google Sign-In (from google-services.json)
 export const WEB_CLIENT_ID = "618857700333-23ihgpeqn9lp7h6b2ror6ed98pdad3bq.apps.googleusercontent.com";
-
-// Backend API URL
-export const BACKEND_URL = __DEV__
-  ? 'http://192.168.0.168:3000' // Development: IP de tu PC en la red local
-  : 'https://tu-backend-produccion.com'; // Production

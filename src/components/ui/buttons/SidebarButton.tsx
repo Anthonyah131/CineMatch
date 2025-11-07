@@ -1,4 +1,3 @@
-import React from 'react';
 import { TouchableOpacity, Text, StyleSheet, View } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 
@@ -17,18 +16,13 @@ export default function SidebarButton({
 }: SidebarButtonProps) {
   return (
     <TouchableOpacity
-      style={[styles.button, active && styles.activeButton]}
+      style={[styles.button, active && styles.buttonActive]}
       onPress={onPress}
-      activeOpacity={0.8}
+      activeOpacity={0.7}
     >
       <View style={styles.row}>
-        <Icon
-          name={icon}
-          size={20}
-          color={active ? '#1B1730' : '#fff'}
-          style={styles.icon}
-        />
-        <Text style={[styles.text, active && styles.activeText]}>{title}</Text>
+        <Icon name={icon} size={22} color="#C7A24C" style={styles.icon} />
+        <Text style={styles.text}>{title}</Text>
       </View>
     </TouchableOpacity>
   );
@@ -37,26 +31,23 @@ export default function SidebarButton({
 const styles = StyleSheet.create({
   button: {
     paddingVertical: 12,
-    paddingHorizontal: 18,
-    borderRadius: 12,
-    marginVertical: 6,
+    paddingHorizontal: 12,
+    borderRadius: 20,
+    marginVertical: 4,
   },
-  activeButton: {
-    backgroundColor: '#E69CA3',
+  buttonActive: {
+    backgroundColor: 'rgba(199, 162, 76, 0.15)',
   },
   row: {
     flexDirection: 'row',
     alignItems: 'center',
   },
   icon: {
-    marginRight: 12,
+    marginRight: 16,
   },
   text: {
-    color: '#fff',
+    color: '#C7A24C',
     fontSize: 16,
     fontWeight: '500',
-  },
-  activeText: {
-    color: '#1B1730',
   },
 });

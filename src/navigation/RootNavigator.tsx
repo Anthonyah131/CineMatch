@@ -4,10 +4,27 @@ import { ActivityIndicator, View, StyleSheet } from 'react-native';
 import AuthStack from './stacks/AuthStack';
 import AppTabs from './tabs/AppTabs';
 import { useAuth } from '../context/AuthContext';
+import MovieDetailsScreen from '../screens/movies/MovieDetailsScreen';
 
+/**
+ * 🗂️ Root Stack Param List
+ *
+ * Navegación principal de la app:
+ * - Auth: Stack de autenticación (OnBoarding, Login, SignUp)
+ * - App: Tab Navigator (Home, Search, Profile) con sidebar
+ * - Pantallas adicionales SIN tabs ni sidebar:
+ *   - MovieDetails: Detalles de película
+ *   - ... aquí agregas más pantallas que no necesiten tabs
+ */
 export type RootStackParamList = {
   Auth: undefined;
   App: undefined;
+  MovieDetails: { movieId: number };
+  // Aquí puedes agregar más pantallas sin tabs:
+  // TVShowDetails: { tvShowId: number };
+  // PersonDetails: { personId: number };
+  // FullScreenVideo: { videoKey: string };
+  // etc...
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -27,10 +44,24 @@ export default function RootNavigator() {
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
       {user ? (
-        // Usuario autenticado: mostrar app
-        <Stack.Screen name="App" component={AppTabs} />
+        // Usuario autenticado
+        <>
+          {/* Tab Navigator - CON tabs y sidebar */}
+          <Stack.Screen name="App" component={AppTabs} />
+
+          {/* Pantallas adicionales - SIN tabs ni sidebar */}
+          <Stack.Screen
+            name="MovieDetails"
+            component={MovieDetailsScreen}
+            options={{
+              presentation: 'card',
+              animation: 'slide_from_right',
+            }}
+          />
+          {/* Aquí agregas más pantallas sin tabs */}
+        </>
       ) : (
-        // Usuario no autenticado: mostrar login
+        // Usuario no autenticado
         <Stack.Screen name="Auth" component={AuthStack} />
       )}
     </Stack.Navigator>
@@ -42,6 +73,6 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#1B1730',
+    backgroundColor: '#0F0B0A',
   },
 });

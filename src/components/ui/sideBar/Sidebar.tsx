@@ -1,16 +1,34 @@
-import React from 'react';
-import { View, Text, StyleSheet, Image, ScrollView, ActivityIndicator } from 'react-native';
-import SidebarButton from '../buttons/SidebarButton';
+'use client';
+import {
+  View,
+  Text,
+  StyleSheet,
+  Image,
+  ScrollView,
+  ActivityIndicator,
+  TouchableOpacity,
+} from 'react-native';
+import Icon from 'react-native-vector-icons/Ionicons';
 import { useAuth } from '../../../context/AuthContext';
+import SidebarButton from '../buttons/SidebarButton';
 
-export default function Sidebar({ navigation, onClose }: any) {
+interface SidebarProps {
+  navigation: any;
+  onClose: () => void;
+  currentScreen?: string;
+}
+
+export default function Sidebar({
+  navigation,
+  onClose,
+  currentScreen = 'Home',
+}: SidebarProps) {
   const { user, logout, isAuthenticating } = useAuth();
 
   const handleLogout = async () => {
     try {
       if (onClose) onClose();
       await logout();
-      // La navegación se manejará automáticamente por RootNavigator
     } catch (error) {
       console.error('Error al cerrar sesión:', error);
     }
@@ -18,97 +36,115 @@ export default function Sidebar({ navigation, onClose }: any) {
 
   return (
     <View style={styles.container}>
-      {/* Header */}
+      <TouchableOpacity
+        style={styles.hamburgerButton}
+        onPress={onClose}
+        activeOpacity={0.7}
+      >
+        <Icon name="menu-outline" size={28} color="#C7A24C" />
+      </TouchableOpacity>
+
       <View style={styles.profileSection}>
-        <Image
-          source={{ 
-            uri: user?.photoUrl || 'https://i.pravatar.cc/150?img=12' 
-          }}
-          style={styles.avatar}
-        />
-        <Text style={styles.username}>{user?.name || 'Usuario'}</Text>
-        <Text style={styles.handle}>@{user?.email?.split('@')[0] || 'user'}</Text>
+        <View style={styles.profileRow}>
+          <Image
+            source={{
+              uri: user?.photoUrl || 'https://i.pravatar.cc/150?img=12',
+            }}
+            style={styles.avatar}
+          />
+          <View style={styles.profileInfo}>
+            <Text style={styles.username}>{user?.name || 'Usuario'}</Text>
+            <Text style={styles.handle}>
+              @{user?.email?.split('@')[0] || 'user'}
+            </Text>
+          </View>
+        </View>
 
         <View style={styles.followRow}>
-          <Text style={styles.followText}>500 Followers</Text>
-          <Text style={styles.followText}>420 Following</Text>
+          <TouchableOpacity style={styles.followButton}>
+            <Text style={styles.followButtonText}>500 Followers</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.followButton}>
+            <Text style={styles.followButtonText}>420 Following</Text>
+          </TouchableOpacity>
         </View>
       </View>
 
       {/* Options */}
-      <ScrollView>
+      <ScrollView style={styles.menuSection} showsVerticalScrollIndicator={false}>
         <SidebarButton
           title="Home"
           icon="home-outline"
           onPress={() => {
             if (onClose) onClose();
-            navigation.navigate('Home');
           }}
-          active
+          active={currentScreen === 'Home'}
         />
         <SidebarButton
           title="Films"
           icon="film-outline"
           onPress={() => {
             if (onClose) onClose();
-            // navigation.navigate('Films');
           }}
+          active={currentScreen === 'Films'}
         />
         <SidebarButton
           title="Diary"
           icon="book-outline"
           onPress={() => {
             if (onClose) onClose();
-            // navigation.navigate('Diary');
           }}
+          active={currentScreen === 'Diary'}
         />
         <SidebarButton
           title="Reviews"
           icon="chatbubble-outline"
           onPress={() => {
             if (onClose) onClose();
-            // navigation.navigate('Reviews');
           }}
+          active={currentScreen === 'Reviews'}
         />
         <SidebarButton
           title="Watchlist"
           icon="bookmark-outline"
           onPress={() => {
             if (onClose) onClose();
-            // navigation.navigate('Watchlist');
           }}
+          active={currentScreen === 'Watchlist'}
         />
         <SidebarButton
           title="Lists"
           icon="list-outline"
           onPress={() => {
             if (onClose) onClose();
-            // navigation.navigate('Lists');
           }}
+          active={currentScreen === 'Lists'}
         />
         <SidebarButton
           title="Likes"
           icon="heart-outline"
           onPress={() => {
             if (onClose) onClose();
-            // navigation.navigate('Likes');
           }}
+          active={currentScreen === 'Likes'}
         />
       </ScrollView>
 
       {/* Logout */}
-      {isAuthenticating ? (
-        <View style={styles.logoutLoading}>
-          <ActivityIndicator color="#E69CA3" />
-          <Text style={styles.logoutLoadingText}>Cerrando sesión...</Text>
-        </View>
-      ) : (
-        <SidebarButton
-          title="Logout"
-          icon="log-out-outline"
-          onPress={handleLogout}
-        />
-      )}
+      <View style={styles.logoutSection}>
+        {isAuthenticating ? (
+          <View style={styles.logoutLoading}>
+            <ActivityIndicator color="#C7A24C" />
+            <Text style={styles.logoutLoadingText}>Cerrando sesión...</Text>
+          </View>
+        ) : (
+          <SidebarButton
+            title="Logout"
+            icon="log-out-outline"
+            onPress={handleLogout}
+          />
+        )}
+      </View>
     </View>
   );
 }
@@ -116,38 +152,71 @@ export default function Sidebar({ navigation, onClose }: any) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#1B1730',
-    paddingTop: 50,
+    backgroundColor: '#0F0B0A',
+    paddingTop: 10,
+  },
+  hamburgerButton: {
     paddingHorizontal: 20,
-  },
-  profileSection: {
-    alignItems: 'center',
-    marginBottom: 20,
-  },
-  avatar: {
-    width: 70,
-    height: 70,
-    borderRadius: 35,
+    paddingVertical: 8,
+    alignSelf: 'flex-start',
     marginBottom: 8,
   },
+  profileSection: {
+    paddingHorizontal: 20,
+    paddingTop: 20,
+    paddingBottom: 20,
+  },
+  profileRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  avatar: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    marginRight: 12,
+  },
+  profileInfo: {
+    flex: 1,
+  },
   username: {
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: 'bold',
-    color: '#fff',
+    color: '#F2E9E4',
+    marginBottom: 2,
   },
   handle: {
-    fontSize: 14,
-    color: '#aaa',
-    marginBottom: 12,
+    fontSize: 13,
+    color: 'rgba(242, 233, 228, 0.6)',
   },
   followRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    width: '80%',
+    paddingTop: 20,
   },
-  followText: {
-    color: '#fff',
-    fontSize: 14,
+  followButton: {
+    paddingVertical: 6,
+    paddingHorizontal: 14,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: '#C7A24C',
+    backgroundColor: 'transparent',
+  },
+  followButtonText: {
+    color: '#F2E9E4',
+    fontSize: 11,
+    fontWeight: '500',
+  },
+  menuSection: {
+    flex: 1,
+    paddingHorizontal: 16,
+    paddingTop: 20,
+  },
+  logoutSection: {
+    paddingHorizontal: 16,
+    paddingBottom: 16,
+    paddingTop: 16,
   },
   logoutLoading: {
     flexDirection: 'row',
@@ -157,7 +226,7 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   logoutLoadingText: {
-    color: '#aaa',
+    color: 'rgba(242, 233, 228, 0.6)',
     fontSize: 14,
   },
 });

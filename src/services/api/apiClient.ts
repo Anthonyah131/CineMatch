@@ -1,7 +1,8 @@
 import axios, { AxiosInstance, AxiosError } from 'axios';
 import { getAppToken, removeAppToken } from '../storageService';
-import { API_CONFIG, DEV_CONFIG } from '../../config/api';
+import { API_CONFIG } from '../../config/api';
 import { SimpleEventEmitter } from '../../utils/SimpleEventEmitter';
+import { requestLogger, responseLogger, errorLogger } from './interceptors';
 
 /**
  * Event emitter para eventos de autenticación
@@ -10,6 +11,9 @@ export const authEvents = new SimpleEventEmitter();
 
 /**
  * Cliente HTTP con axios e interceptores
+ * - Agrega automáticamente el token JWT a todas las peticiones
+ * - Maneja errores 401 y fuerza logout cuando el token expira
+ * - Logs automáticos en desarrollo (ver interceptors.ts)
  */
 class ApiClient {
   private axiosInstance: AxiosInstance;
@@ -23,75 +27,49 @@ class ApiClient {
     });
 
     // Configurar interceptores
-    this.setupRequestInterceptor();
-    this.setupResponseInterceptor();
+    this.setupInterceptors();
   }
 
   /**
-   * Interceptor de request para agregar token y logs
+   * Configurar todos los interceptores
    */
-  private setupRequestInterceptor(): void {
+  private setupInterceptors(): void {
+    // REQUEST INTERCEPTORS
+    
+    // 1. Agregar token de autenticación
     this.axiosInstance.interceptors.request.use(
       async config => {
         try {
-          // Agregar token si existe
           const token = await getAppToken();
-          if (token) {
+          if (token && config.headers) {
             config.headers.Authorization = `Bearer ${token}`;
           }
-
-          // Logs en desarrollo
-          if (DEV_CONFIG.ENABLE_LOGS) {
-            console.log(
-              `📤 API Request: ${config.method?.toUpperCase()} ${config.url}`,
-              {
-                headers: config.headers,
-                data: config.data,
-              },
-            );
-          }
         } catch (error) {
-          console.error('Error getting token:', error);
+          console.error('Error obteniendo token:', error);
         }
         return config;
       },
-      error => {
-        if (DEV_CONFIG.ENABLE_LOGS) {
-          console.error('❌ Request Error:', error);
-        }
-        return Promise.reject(error);
-      },
+      error => Promise.reject(error)
     );
-  }
 
-  /**
-   * Interceptor de response para logs y manejo de errores
-   */
-  private setupResponseInterceptor(): void {
+    // 2. Logger de requests (solo en desarrollo)
+    this.axiosInstance.interceptors.request.use(
+      requestLogger,
+      error => Promise.reject(error)
+    );
+
+    // RESPONSE INTERCEPTORS
+    
+    // 1. Logger de responses (solo en desarrollo)
     this.axiosInstance.interceptors.response.use(
-      response => {
-        // Logs en desarrollo
-        if (DEV_CONFIG.ENABLE_LOGS) {
-          console.log(
-            `📥 API Response: ${response.config.method?.toUpperCase()} ${response.config.url}`,
-            {
-              status: response.status,
-              data: response.data,
-            },
-          );
-        }
-        return response;
-      },
-      async (error: AxiosError) => {
-        // Logs de error en desarrollo
-        if (DEV_CONFIG.ENABLE_LOGS) {
-          console.error(`❌ API Error: ${error.config?.method?.toUpperCase()} ${error.config?.url}`, {
-            status: error.response?.status,
-            data: error.response?.data,
-            message: error.message,
-          });
-        }
+      responseLogger,
+      errorLogger
+    );
 
+    // 2. Manejo de errores de autenticación
+    this.axiosInstance.interceptors.response.use(
+      response => response,
+      async (error: AxiosError) => {
         // Manejar errores 401 (no autorizado)
         if (error.response?.status === 401) {
           const errorMessage = (error.response?.data as any)?.message || '';
@@ -103,9 +81,11 @@ class ApiClient {
 
           // Solo forzar logout si NO es un error de verificación de email
           if (!isEmailNotVerified) {
-            console.log('🔐 Token expirado, cerrando sesión...');
+            console.log('🔐 Token expirado o inválido, cerrando sesión...');
             await removeAppToken();
-            delete this.axiosInstance.defaults.headers.common.Authorization;
+            if (this.axiosInstance.defaults.headers.common) {
+              delete this.axiosInstance.defaults.headers.common.Authorization;
+            }
             authEvents.emit('forceLogout');
           } else {
             console.log('📧 Email no verificado, no se fuerza logout');
@@ -113,7 +93,7 @@ class ApiClient {
         }
 
         return Promise.reject(error);
-      },
+      }
     );
   }
 

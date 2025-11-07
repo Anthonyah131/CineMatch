@@ -1,4 +1,9 @@
-import { BACKEND_URL } from './firebase';
+/**
+ * Backend URL - Configuración centralizada
+ */
+export const BACKEND_URL = __DEV__
+  ? 'https://cine-match-backend.vercel.app' // Development
+  : 'https://cine-match-backend.vercel.app'; // Production
 
 /**
  * Configuración de la API

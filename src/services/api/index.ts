@@ -248,12 +248,14 @@ export const usersAPI = {
   /**
    * Seguir a un usuario
    */
-  followUser: (targetUid: string) => apiClient.post<void>(`/users/follow/${targetUid}`),
+  followUser: (targetUid: string) =>
+    apiClient.post<void>(`/users/follow/${targetUid}`),
 
   /**
    * Dejar de seguir a un usuario
    */
-  unfollowUser: (targetUid: string) => apiClient.delete<void>(`/users/follow/${targetUid}`),
+  unfollowUser: (targetUid: string) =>
+    apiClient.delete<void>(`/users/follow/${targetUid}`),
 
   /**
    * Obtener mis seguidores
@@ -289,7 +291,8 @@ export const listsAPI = {
   /**
    * Actualizar una lista
    */
-  update: (listId: string, data: UpdateListDto) => apiClient.put<List>(`/lists/${listId}`, data),
+  update: (listId: string, data: UpdateListDto) =>
+    apiClient.put<List>(`/lists/${listId}`, data),
 
   /**
    * Eliminar una lista
@@ -342,7 +345,9 @@ export const tmdbAPI = {
    * Obtener películas populares
    */
   getPopular: (page: number = 1) =>
-    apiClient.get<PaginatedResponse<Movie>>(`/tmdb/movies/popular?page=${page}`),
+    apiClient.get<PaginatedResponse<Movie>>(
+      `/tmdb/movies/popular?page=${page}`,
+    ),
 
   /**
    * Buscar películas
@@ -356,29 +361,37 @@ export const tmdbAPI = {
    * Obtener películas en tendencia
    */
   getTrending: (page: number = 1) =>
-    apiClient.get<PaginatedResponse<Movie>>(`/tmdb/movies/trending?page=${page}`),
+    apiClient.get<PaginatedResponse<Movie>>(
+      `/tmdb/movies/trending?page=${page}`,
+    ),
 
   /**
    * Obtener próximos estrenos
    */
   getUpcoming: (page: number = 1) =>
-    apiClient.get<PaginatedResponse<Movie>>(`/tmdb/movies/upcoming?page=${page}`),
+    apiClient.get<PaginatedResponse<Movie>>(
+      `/tmdb/movies/upcoming?page=${page}`,
+    ),
 
   /**
    * Obtener películas mejor calificadas
    */
   getTopRated: (page: number = 1) =>
-    apiClient.get<PaginatedResponse<Movie>>(`/tmdb/movies/top-rated?page=${page}`),
+    apiClient.get<PaginatedResponse<Movie>>(
+      `/tmdb/movies/top-rated?page=${page}`,
+    ),
 
   /**
    * Obtener detalles de una película
    */
-  getMovieDetails: (movieId: number) => apiClient.get<MovieDetails>(`/tmdb/movies/${movieId}`),
+  getMovieDetails: (movieId: number) =>
+    apiClient.get<MovieDetails>(`/tmdb/movies/${movieId}`),
 
   /**
    * Obtener créditos de una película (cast & crew)
    */
-  getCredits: (movieId: number) => apiClient.get<Credits>(`/tmdb/movies/${movieId}/credits`),
+  getCredits: (movieId: number) =>
+    apiClient.get<Credits>(`/tmdb/movies/${movieId}/credits`),
 
   /**
    * Obtener proveedores de streaming para una película
@@ -393,7 +406,9 @@ export const tmdbAPI = {
    */
   discover: (filters: DiscoverFilters) => {
     const params = new URLSearchParams(filters as any);
-    return apiClient.get<PaginatedResponse<Movie>>(`/tmdb/movies/discover?${params}`);
+    return apiClient.get<PaginatedResponse<Movie>>(
+      `/tmdb/movies/discover?${params}`,
+    );
   },
 
   /**
@@ -448,25 +463,31 @@ export const mediaCacheAPI = {
    * Buscar en el cache
    */
   search: (query: string) =>
-    apiClient.get<(Movie | TVShow)[]>(`/media/cache/search?query=${encodeURIComponent(query)}`),
+    apiClient.get<(Movie | TVShow)[]>(
+      `/media/cache/search?query=${encodeURIComponent(query)}`,
+    ),
 
   /**
    * Obtener película del cache
    */
-  getMovie: (tmdbId: number) => apiClient.get<Movie>(`/media/cache/${tmdbId}/movie`),
+  getMovie: (tmdbId: number) =>
+    apiClient.get<Movie>(`/media/cache/${tmdbId}/movie`),
 
   /**
    * Obtener serie del cache
    */
-  getTVShow: (tmdbId: number) => apiClient.get<TVShow>(`/media/cache/${tmdbId}/tv`),
+  getTVShow: (tmdbId: number) =>
+    apiClient.get<TVShow>(`/media/cache/${tmdbId}/tv`),
 
   /**
    * Guardar película en el cache
    */
-  saveMovie: (tmdbId: number) => apiClient.post<Movie>(`/media/cache/save-movie/${tmdbId}`),
+  saveMovie: (tmdbId: number) =>
+    apiClient.post<Movie>(`/media/cache/save-movie/${tmdbId}`),
 
   /**
    * Guardar serie en el cache
    */
-  saveTVShow: (tmdbId: number) => apiClient.post<TVShow>(`/media/cache/save-tv/${tmdbId}`),
+  saveTVShow: (tmdbId: number) =>
+    apiClient.post<TVShow>(`/media/cache/save-tv/${tmdbId}`),
 };
