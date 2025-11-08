@@ -2,6 +2,7 @@
 
 import { createContext, useContext, useState, type ReactNode } from 'react';
 import { Modal, View, ActivityIndicator, Text, StyleSheet } from 'react-native';
+import { COLORS } from '../config/colors';
 
 // Define el tipo del contexto
 interface LoadingContextType {
@@ -48,7 +49,7 @@ export function LoadingProvider({ children }: LoadingProviderProps) {
       >
         <View style={styles.overlay}>
           <View style={styles.container}>
-            <ActivityIndicator size="large" color="#C7A24C" />
+            <ActivityIndicator size="large" color={COLORS.primary} />
             <Text style={styles.message}>{message}</Text>
           </View>
         </View>
@@ -83,7 +84,7 @@ const styles = StyleSheet.create({
   message: {
     marginTop: 16,
     fontSize: 16,
-    color: '#F2E9E4', // Blanco cálido
+    color: COLORS.text,
     textAlign: 'center',
     fontWeight: '500',
   },

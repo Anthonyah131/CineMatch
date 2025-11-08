@@ -1,14 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import type { TmdbMovieDetails } from '../../../types/tmdb.types';
-
-const COLORS = {
-  background: '#0F0B0A',
-  surface: '#1A1412',
-  primary: '#C7A24C',
-  accent: '#A4252C',
-  text: '#F2E9E4',
-};
+import { COLORS } from '../../../config/colors';
 
 interface MovieDetailsTabProps {
   movieDetails: TmdbMovieDetails;
@@ -57,10 +50,7 @@ export function MovieDetailsTab({ movieDetails }: MovieDetailsTabProps) {
 
       {/* Duración */}
       {movieDetails.runtime && (
-        <DetailRow
-          label="Duración"
-          value={`${movieDetails.runtime} minutos`}
-        />
+        <DetailRow label="Duración" value={`${movieDetails.runtime} minutos`} />
       )}
 
       {/* Estado */}

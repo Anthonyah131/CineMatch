@@ -2,14 +2,7 @@ import React from 'react';
 import { View, Text, Image, ScrollView, StyleSheet } from 'react-native';
 import type { TmdbCastMember } from '../../../types/tmdb.types';
 import { buildProfileUrl } from '../../../utils/tmdbImageHelpers';
-
-const COLORS = {
-  background: '#0F0B0A',
-  surface: '#1A1412',
-  primary: '#C7A24C',
-  accent: '#A4252C',
-  text: '#F2E9E4',
-};
+import { COLORS } from '../../../config/colors';
 
 interface CastCarouselProps {
   cast: TmdbCastMember[];

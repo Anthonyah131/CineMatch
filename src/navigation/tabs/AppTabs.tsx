@@ -2,21 +2,28 @@ import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { StyleSheet } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
+import { GameScreen } from '../../screens/game/GameScreen';
+import { SearchScreen } from '../../screens/search/SearchScreen';
 import HomeStack from '../stacks/HomeStack';
-import SearchStack from '../stacks/SearchStack';
-import ProfileStack from '../stacks/ProfileStack';
+import { ChatsListScreen } from '../../screens/chats/ChatsListScreen';
+import ProfileScreen from '../../screens/profile/ProfileScreen';
+import { COLORS } from '../../config/colors';
 
 /**
  * 📱 App Tabs Param List
  *
- * Tabs principales de la app (CON tab bar y sidebar):
- * - HomeTab: Stack con HomeMain y otras pantallas de home
- * - SearchTab: Stack con búsqueda y filtros
- * - ProfileTab: Stack con perfil y configuración
+ * Tabs principales de la app (CON tab bar):
+ * - GameTab: Pantalla de juegos (placeholder)
+ * - SearchTab: Búsqueda de películas
+ * - HomeTab: Stack con HomeMain
+ * - ChatsTab: Lista de chats
+ * - ProfileTab: Perfil del usuario
  */
 export type AppTabsParamList = {
-  HomeTab: undefined;
+  GameTab: undefined;
   SearchTab: undefined;
+  HomeTab: undefined;
+  ChatsTab: undefined;
   ProfileTab: undefined;
 };
 
@@ -25,8 +32,13 @@ const Tab = createBottomTabNavigator<AppTabsParamList>();
 function getTabBarIcon(routeName: keyof AppTabsParamList) {
   return ({ color, size }: { color: string; size: number }) => {
     let iconName: string = 'home-outline';
+    
+    if (routeName === 'GameTab') iconName = 'game-controller-outline';
     if (routeName === 'SearchTab') iconName = 'search-outline';
+    if (routeName === 'HomeTab') iconName = 'home-outline';
+    if (routeName === 'ChatsTab') iconName = 'chatbubbles-outline';
     if (routeName === 'ProfileTab') iconName = 'person-outline';
+    
     return <Icon name={iconName} size={size} color={color} />;
   };
 }
@@ -34,28 +46,39 @@ function getTabBarIcon(routeName: keyof AppTabsParamList) {
 export default function AppTabs() {
   return (
     <Tab.Navigator
+      initialRouteName="HomeTab"
       screenOptions={({ route }) => ({
         headerShown: false,
         tabBarStyle: styles.tabBar,
-        tabBarActiveTintColor: '#C7A24C',
-        tabBarInactiveTintColor: '#C9ADA7',
+        tabBarActiveTintColor: COLORS.primary,
+        tabBarInactiveTintColor: COLORS.textSecondary,
         tabBarIcon: getTabBarIcon(route.name as keyof AppTabsParamList),
         tabBarLabelStyle: styles.tabBarLabel,
       })}
     >
       <Tab.Screen
-        name="HomeTab"
-        component={HomeStack}
-        options={{ tabBarLabel: 'Inicio' }}
+        name="GameTab"
+        component={GameScreen}
+        options={{ tabBarLabel: 'Game' }}
       />
       <Tab.Screen
         name="SearchTab"
-        component={SearchStack}
+        component={SearchScreen}
         options={{ tabBarLabel: 'Buscar' }}
       />
       <Tab.Screen
+        name="HomeTab"
+        component={HomeStack}
+        options={{ tabBarLabel: 'Home' }}
+      />
+      <Tab.Screen
+        name="ChatsTab"
+        component={ChatsListScreen}
+        options={{ tabBarLabel: 'Chats' }}
+      />
+      <Tab.Screen
         name="ProfileTab"
-        component={ProfileStack}
+        component={ProfileScreen}
         options={{ tabBarLabel: 'Perfil' }}
       />
     </Tab.Navigator>
@@ -64,15 +87,15 @@ export default function AppTabs() {
 
 const styles = StyleSheet.create({
   tabBar: {
-    backgroundColor: '#1A1412',
+    backgroundColor: COLORS.background,
     borderTopWidth: 1,
-    borderTopColor: '#1A1412',
+    borderTopColor: COLORS.border,
     height: 60,
     paddingBottom: 8,
     paddingTop: 8,
   },
   tabBarLabel: {
-    fontSize: 12,
+    fontSize: 11,
     fontWeight: '600',
   },
 });

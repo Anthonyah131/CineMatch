@@ -11,6 +11,7 @@ import {
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useAuth } from '../../../context/AuthContext';
 import SidebarButton from '../buttons/SidebarButton';
+import { COLORS } from '../../../config/colors';
 
 interface SidebarProps {
   navigation: any;
@@ -41,7 +42,7 @@ export default function Sidebar({
         onPress={onClose}
         activeOpacity={0.7}
       >
-        <Icon name="menu-outline" size={28} color="#C7A24C" />
+        <Icon name="menu-outline" size={28} color={COLORS.primary} />
       </TouchableOpacity>
 
       <View style={styles.profileSection}>
@@ -152,7 +153,7 @@ export default function Sidebar({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#0F0B0A',
+    backgroundColor: COLORS.background,
     paddingTop: 10,
   },
   hamburgerButton: {
@@ -183,7 +184,7 @@ const styles = StyleSheet.create({
   username: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: '#F2E9E4',
+    color: COLORS.text,
     marginBottom: 2,
   },
   handle: {
@@ -200,11 +201,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     borderRadius: 20,
     borderWidth: 1,
-    borderColor: '#C7A24C',
-    backgroundColor: 'transparent',
+    borderColor: COLORS.primary,
+    backgroundColor: COLORS.transparent,
   },
   followButtonText: {
-    color: '#F2E9E4',
+    color: COLORS.text,
     fontSize: 11,
     fontWeight: '500',
   },

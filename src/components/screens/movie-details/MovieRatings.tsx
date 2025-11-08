@@ -1,13 +1,6 @@
 import { View, Text, StyleSheet } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
-
-const COLORS = {
-  background: '#0F0B0A',
-  surface: '#1A1412',
-  primary: '#C7A24C',
-  accent: '#A4252C',
-  text: '#F2E9E4',
-};
+import { COLORS } from '../../../config/colors';
 
 interface MovieRatingsProps {
   voteAverage: number;
@@ -177,7 +170,7 @@ const styles = StyleSheet.create({
   },
   userRatingText: {
     fontSize: 12,
-    color: '#E69CA3',
+    color: COLORS.primary,
     fontWeight: '600',
   },
 });

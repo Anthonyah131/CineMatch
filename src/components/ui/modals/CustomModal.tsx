@@ -8,19 +8,8 @@ import {
   Dimensions,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
+import { COLORS } from '../../../config/colors';
 import type { ModalConfig } from '../../../types/modal.types';
-
-const COLORS = {
-  background: '#0F0B0A',
-  surface: '#1A1412',
-  primary: '#C7A24C',
-  accent: '#A4252C',
-  text: '#F2E9E4',
-  error: '#EF4444',
-  success: '#10B981',
-  warning: '#F59E0B',
-  info: '#3B82F6',
-};
 
 interface CustomModalProps {
   visible: boolean;

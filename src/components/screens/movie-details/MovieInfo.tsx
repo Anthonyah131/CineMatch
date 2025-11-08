@@ -1,13 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-
-const COLORS = {
-  background: '#0F0B0A',
-  surface: '#1A1412',
-  primary: '#C7A24C',
-  accent: '#A4252C',
-  text: '#F2E9E4',
-};
+import { COLORS } from '../../../config/colors';
 
 const MAX_OVERVIEW_LENGTH = 150;
 
@@ -33,9 +26,10 @@ export function MovieInfo({
   const runtimeFormatted = runtime ? `${runtime} min` : 'N/A';
 
   const shouldTruncate = overview.length > MAX_OVERVIEW_LENGTH;
-  const displayedOverview = expanded || !shouldTruncate 
-    ? overview 
-    : overview.slice(0, MAX_OVERVIEW_LENGTH) + '...';
+  const displayedOverview =
+    expanded || !shouldTruncate
+      ? overview
+      : overview.slice(0, MAX_OVERVIEW_LENGTH) + '...';
 
   return (
     <View style={styles.container}>

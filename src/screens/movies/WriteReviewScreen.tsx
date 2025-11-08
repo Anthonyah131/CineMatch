@@ -25,16 +25,7 @@ import type { TmdbMovieDetails } from '../../types/tmdb.types';
 import type { LogMediaViewDto } from '../../types/mediaLog.types';
 import { buildPosterUrl } from '../../utils/tmdbImageHelpers';
 import { formatShortDate } from '../../utils/dateFormatter';
-
-const COLORS = {
-  background: '#0F0B0A',
-  surface: '#1A1412',
-  primary: '#C7A24C',
-  accent: '#A4252C',
-  text: '#F2E9E4',
-  error: '#EF4444',
-  success: '#10B981',
-};
+import { COLORS } from '../../config/colors';
 
 interface WriteReviewScreenProps {
   route: {

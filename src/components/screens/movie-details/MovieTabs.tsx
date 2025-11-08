@@ -1,45 +1,45 @@
-import { View, TouchableOpacity, Text, StyleSheet } from "react-native"
+import { View, TouchableOpacity, Text, StyleSheet } from 'react-native';
+import { COLORS } from '../../../config/colors';
 
-const COLORS = {
-  background: "#0F0B0A",
-  surface: "#1A1412",
-  primary: "#C7A24C",
-  accent: "#A4252C",
-  text: "#F2E9E4",
-}
-
-export type MovieTab = "cast" | "crew" | "details"
+export type MovieTab = 'cast' | 'crew' | 'details';
 
 interface MovieTabsProps {
-  activeTab: MovieTab
-  onTabChange: (tab: MovieTab) => void
+  activeTab: MovieTab;
+  onTabChange: (tab: MovieTab) => void;
 }
 
 export function MovieTabs({ activeTab, onTabChange }: MovieTabsProps) {
   const tabs: Array<{ id: MovieTab; label: string }> = [
-    { id: "cast", label: "Casts" },
-    { id: "crew", label: "Crews" },
-    { id: "details", label: "Details" },
-  ]
+    { id: 'cast', label: 'Casts' },
+    { id: 'crew', label: 'Crews' },
+    { id: 'details', label: 'Details' },
+  ];
 
   return (
     <View style={styles.container}>
-      {tabs.map((tab) => (
+      {tabs.map(tab => (
         <TouchableOpacity
           key={tab.id}
           style={[styles.tab, activeTab === tab.id && styles.activeTab]}
           onPress={() => onTabChange(tab.id)}
         >
-          <Text style={[styles.tabText, activeTab === tab.id && styles.activeTabText]}>{tab.label}</Text>
+          <Text
+            style={[
+              styles.tabText,
+              activeTab === tab.id && styles.activeTabText,
+            ]}
+          >
+            {tab.label}
+          </Text>
         </TouchableOpacity>
       ))}
     </View>
-  )
+  );
 }
 
 const styles = StyleSheet.create({
   container: {
-    flexDirection: "row",
+    flexDirection: 'row',
     paddingHorizontal: 20,
     gap: 12,
     marginBottom: 20,
@@ -55,7 +55,7 @@ const styles = StyleSheet.create({
   },
   tabText: {
     fontSize: 14,
-    fontWeight: "600",
+    fontWeight: '600',
     color: COLORS.primary,
     opacity: 0.6,
   },
@@ -63,4 +63,4 @@ const styles = StyleSheet.create({
     opacity: 1,
     color: COLORS.primary,
   },
-})
+});

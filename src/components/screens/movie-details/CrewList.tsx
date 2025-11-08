@@ -1,14 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import type { TmdbCrewMember } from '../../../types/tmdb.types';
-
-const COLORS = {
-  background: '#0F0B0A',
-  surface: '#1A1412',
-  primary: '#C7A24C',
-  accent: '#A4252C',
-  text: '#F2E9E4',
-};
+import { COLORS } from '../../../config/colors';
 
 interface CrewListProps {
   crew: TmdbCrewMember[];
@@ -24,17 +17,14 @@ export function CrewList({ crew }: CrewListProps) {
   }
 
   // Agrupar por departamento
-  const departments = crew.reduce(
-    (acc, member) => {
-      const dept = member.department || 'Other';
-      if (!acc[dept]) {
-        acc[dept] = [];
-      }
-      acc[dept].push(member);
-      return acc;
-    },
-    {} as Record<string, TmdbCrewMember[]>,
-  );
+  const departments = crew.reduce((acc, member) => {
+    const dept = member.department || 'Other';
+    if (!acc[dept]) {
+      acc[dept] = [];
+    }
+    acc[dept].push(member);
+    return acc;
+  }, {} as Record<string, TmdbCrewMember[]>);
 
   return (
     <View style={styles.container}>

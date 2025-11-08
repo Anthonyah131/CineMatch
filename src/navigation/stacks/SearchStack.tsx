@@ -1,6 +1,7 @@
 import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { Text, StyleSheet, View } from 'react-native';
+import { COLORS } from '../../config/colors';
 
 /**
  * 🔍 Search Stack Param List
@@ -42,7 +43,7 @@ export default function SearchStack() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#0F0B0A',
+    backgroundColor: COLORS.background,
     justifyContent: 'center',
     alignItems: 'center',
     padding: 20,
@@ -50,12 +51,12 @@ const styles = StyleSheet.create({
   text: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#F2E9E4',
+    color: COLORS.text,
     marginBottom: 12,
   },
   subtitle: {
     fontSize: 16,
-    color: '#C9ADA7',
+    color: COLORS.textSecondary,
     textAlign: 'center',
   },
 });

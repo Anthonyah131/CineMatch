@@ -6,29 +6,30 @@ import AppTabs from './tabs/AppTabs';
 import { useAuth } from '../context/AuthContext';
 import MovieDetailsScreen from '../screens/movies/MovieDetailsScreen';
 import WriteReviewScreen from '../screens/movies/WriteReviewScreen';
+import { ChatScreen } from '../screens/chats/ChatScreen';
+import { MatchesScreen } from '../screens/matches/MatchesScreen';
 import type { TmdbMovieDetails } from '../types/tmdb.types';
+import { COLORS } from '../config/colors';
 
 /**
  * 🗂️ Root Stack Param List
  *
  * Navegación principal de la app:
  * - Auth: Stack de autenticación (OnBoarding, Login, SignUp)
- * - App: Tab Navigator (Home, Search, Profile) con sidebar
- * - Pantallas adicionales SIN tabs ni sidebar:
+ * - App: Tab Navigator (Game, Search, Home, Chats, Profile) CON tabs
+ * - Pantallas adicionales SIN tabs:
  *   - MovieDetails: Detalles de película
  *   - WriteReview: Escribir review de película
- *   - ... aquí agregas más pantallas que no necesiten tabs
+ *   - Chat: Pantalla de chat individual
+ *   - Matches: Pantalla de matches con otros usuarios
  */
 export type RootStackParamList = {
   Auth: undefined;
   App: undefined;
   MovieDetails: { movieId: number };
   WriteReview: { movieDetails: TmdbMovieDetails };
-  // Aquí puedes agregar más pantallas sin tabs:
-  // TVShowDetails: { tvShowId: number };
-  // PersonDetails: { personId: number };
-  // FullScreenVideo: { videoKey: string };
-  // etc...
+  Chat: { chatId: string };
+  Matches: undefined;
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -50,10 +51,10 @@ export default function RootNavigator() {
       {user ? (
         // Usuario autenticado
         <>
-          {/* Tab Navigator - CON tabs y sidebar */}
+          {/* Tab Navigator - CON tabs */}
           <Stack.Screen name="App" component={AppTabs} />
 
-          {/* Pantallas adicionales - SIN tabs ni sidebar */}
+          {/* Pantallas adicionales - SIN tabs */}
           <Stack.Screen
             name="MovieDetails"
             component={MovieDetailsScreen}
@@ -68,6 +69,22 @@ export default function RootNavigator() {
             options={{
               presentation: 'card',
               animation: 'slide_from_bottom',
+            }}
+          />
+          <Stack.Screen
+            name="Chat"
+            component={ChatScreen}
+            options={{
+              presentation: 'card',
+              animation: 'slide_from_right',
+            }}
+          />
+          <Stack.Screen
+            name="Matches"
+            component={MatchesScreen}
+            options={{
+              presentation: 'card',
+              animation: 'slide_from_right',
             }}
           />
           {/* Aquí agregas más pantallas sin tabs */}
@@ -85,6 +102,6 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#0F0B0A',
+    backgroundColor: COLORS.background,
   },
 });

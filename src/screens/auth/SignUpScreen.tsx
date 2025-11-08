@@ -12,6 +12,7 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import CustomInput from '../../components/ui/inputs/CustomInput';
 import CustomButton from '../../components/ui/buttons/CustomButton';
 import { useAuth } from '../../context/AuthContext';
+import { COLORS } from '../../config/colors';
 
 export default function SignUpScreen({ navigation }: any) {
   const [username, setUsername] = useState('');
@@ -168,42 +169,42 @@ const styles = StyleSheet.create({
     marginHorizontal: 5,
   },
   circleOrange: {
-    backgroundColor: '#FF6D00',
+    backgroundColor: COLORS.warning,
   },
   circleGreen: {
-    backgroundColor: '#00C853',
+    backgroundColor: COLORS.success,
   },
   circleBlue: {
-    backgroundColor: '#2979FF',
+    backgroundColor: COLORS.info,
   },
   circleCyan: {
-    backgroundColor: '#00E5FF',
+    backgroundColor: COLORS.info,
   },
   title: {
     textAlign: 'center',
-    color: '#fff',
+    color: COLORS.text,
     fontSize: 22,
     fontWeight: 'bold',
     marginBottom: 20,
   },
   header: {
     textAlign: 'center',
-    color: '#fff',
+    color: COLORS.text,
     fontSize: 20,
     fontWeight: 'bold',
   },
   subheader: {
     textAlign: 'center',
-    color: '#ccc',
+    color: COLORS.textSecondary,
     marginBottom: 20,
   },
   footerText: {
     textAlign: 'center',
-    color: '#ccc',
+    color: COLORS.textSecondary,
     marginTop: 20,
   },
   link: {
-    color: '#E69CA3',
+    color: COLORS.primary,
     fontWeight: 'bold',
   },
   separatorContainer: {
@@ -214,10 +215,10 @@ const styles = StyleSheet.create({
   separatorLine: {
     flex: 1,
     height: 1,
-    backgroundColor: '#555',
+    backgroundColor: COLORS.border,
   },
   separatorText: {
-    color: '#aaa',
+    color: COLORS.textSecondary,
     marginHorizontal: 10,
     fontSize: 14,
   },
@@ -225,14 +226,14 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#fff',
+    backgroundColor: COLORS.text,
     paddingVertical: 12,
     borderRadius: 8,
     marginBottom: 10,
     gap: 10,
   },
   googleButtonText: {
-    color: '#1A1A1A',
+    color: COLORS.background,
     fontSize: 16,
     fontWeight: '600',
   },

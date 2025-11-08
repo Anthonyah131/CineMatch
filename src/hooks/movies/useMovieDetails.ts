@@ -1,7 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { tmdbService } from '../../services/tmdbService';
 import { usersService } from '../../services/usersService';
-import { useLoading } from '../../context/LoadingContext';
 import type {
   TmdbMovieDetails,
   TmdbCreditsResponse,
@@ -22,8 +21,6 @@ interface UseMovieDetailsReturn {
 }
 
 export const useMovieDetails = (movieId: number): UseMovieDetailsReturn => {
-  const { showLoading, hideLoading } = useLoading();
-
   // Estados principales
   const [movieDetails, setMovieDetails] = useState<TmdbMovieDetails | null>(
     null,
@@ -162,7 +159,7 @@ export const useMovieDetails = (movieId: number): UseMovieDetailsReturn => {
    */
   useEffect(() => {
     const loadInitialData = async () => {
-      showLoading('Cargando película...');
+      // NO usar showLoading aquí - la pantalla ya tiene su propio loading state
       setError(null);
 
       try {
@@ -179,50 +176,9 @@ export const useMovieDetails = (movieId: number): UseMovieDetailsReturn => {
         } catch (userErr) {
           // Silencioso si no está autenticado
         }
-
-        // 🎬 LOG CONSOLIDADO - Toda la info de la película en un solo lugar
-        console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-        console.log('🎬 MOVIE DETAILS SCREEN DATA', {
-          movieId,
-          movieDetails: {
-            title: movieDetails?.title,
-            originalTitle: movieDetails?.original_title,
-            releaseDate: movieDetails?.release_date,
-            runtime: movieDetails?.runtime,
-            voteAverage: movieDetails?.vote_average,
-            genres: movieDetails?.genres,
-            overview: movieDetails?.overview,
-            posterPath: movieDetails?.poster_path,
-            backdropPath: movieDetails?.backdrop_path,
-          },
-          credits: {
-            castCount: credits?.cast?.length || 0,
-            topCast: credits?.cast?.slice(0, 5).map(actor => ({
-              name: actor.name,
-              character: actor.character,
-            })),
-            director: credits?.crew?.find(member => member.job === 'Director')
-              ?.name,
-          },
-          watchProviders: {
-            availableRegions: watchProviders?.results
-              ? Object.keys(watchProviders.results).length
-              : 0,
-            regions: watchProviders?.results
-              ? Object.keys(watchProviders.results)
-              : [],
-          },
-          userData: {
-            isFavorite,
-            userRating,
-          },
-        });
-        console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
       } catch (err) {
         console.error('Error loading initial data:', err);
         setError('Error al cargar película');
-      } finally {
-        hideLoading();
       }
     };
 

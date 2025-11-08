@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, Image, Dimensions } from 'react-native';
 import CustomButton from '../../components/ui/buttons/CustomButton';
+import { COLORS } from '../../config/colors';
 
 const { width } = Dimensions.get('window');
 
@@ -47,7 +48,7 @@ export default function OnBoardingScreen({ navigation }: any) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#1B1730',
+    backgroundColor: COLORS.background,
   },
   image: {
     width: width,
@@ -55,7 +56,7 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
-    backgroundColor: '#1B1730',
+    backgroundColor: COLORS.background,
     borderTopLeftRadius: 30,
     borderTopRightRadius: 30,
     padding: 24,
@@ -77,37 +78,37 @@ const styles = StyleSheet.create({
     height: 20,
     borderRadius: 10,
     marginHorizontal: 5,
-    backgroundColor: '#00C853',
+    backgroundColor: COLORS.success,
   },
   circleOrange: {
     width: 20,
     height: 20,
     borderRadius: 10,
     marginHorizontal: 5,
-    backgroundColor: '#FF6D00',
+    backgroundColor: COLORS.warning,
   },
   circleBlue: {
     width: 20,
     height: 20,
     borderRadius: 10,
     marginHorizontal: 5,
-    backgroundColor: '#2979FF',
+    backgroundColor: COLORS.info,
   },
   circleCyan: {
     width: 20,
     height: 20,
     borderRadius: 10,
     marginHorizontal: 5,
-    backgroundColor: '#00E5FF',
+    backgroundColor: COLORS.info,
   },
   title: {
-    color: '#fff',
+    color: COLORS.text,
     fontSize: 22,
     fontWeight: 'bold',
     marginBottom: 12,
   },
   description: {
-    color: '#ccc',
+    color: COLORS.textSecondary,
     fontSize: 15,
     textAlign: 'center',
     marginBottom: 20,

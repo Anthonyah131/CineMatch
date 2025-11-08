@@ -4,9 +4,7 @@ import { useLoading } from '../../context/LoadingContext';
 import type { TmdbMovie } from '../../types/tmdb.types';
 
 interface UseHomeMoviesReturn {
-  popularMovies: TmdbMovie[];
   trendingMovies: TmdbMovie[];
-  upcomingMovies: TmdbMovie[];
   topRatedMovies: TmdbMovie[];
   error: string | null;
   refreshing: boolean;
@@ -16,28 +14,13 @@ interface UseHomeMoviesReturn {
 export const useHomeMovies = (): UseHomeMoviesReturn => {
   const { showLoading, hideLoading } = useLoading();
 
-  // Estado para cada sección
-  const [popularMovies, setPopularMovies] = useState<TmdbMovie[]>([]);
+  // Estado para cada sección (solo las que se muestran)
   const [trendingMovies, setTrendingMovies] = useState<TmdbMovie[]>([]);
-  const [upcomingMovies, setUpcomingMovies] = useState<TmdbMovie[]>([]);
   const [topRatedMovies, setTopRatedMovies] = useState<TmdbMovie[]>([]);
 
   // Estados de carga y error
   const [error, setError] = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);
-
-  /**
-   * Cargar películas populares
-   */
-  const loadPopularMovies = useCallback(async () => {
-    try {
-      const response = await tmdbService.movies.getPopular(1);
-      setPopularMovies(response.results);
-    } catch (err) {
-      console.error('Error loading popular movies:', err);
-      setError('Error al cargar películas populares');
-    }
-  }, []);
 
   /**
    * Cargar películas en tendencia
@@ -49,19 +32,6 @@ export const useHomeMovies = (): UseHomeMoviesReturn => {
     } catch (err) {
       console.error('Error loading trending movies:', err);
       setError('Error al cargar películas en tendencia');
-    }
-  }, []);
-
-  /**
-   * Cargar próximos estrenos
-   */
-  const loadUpcomingMovies = useCallback(async () => {
-    try {
-      const response = await tmdbService.movies.getUpcoming(1);
-      setUpcomingMovies(response.results);
-    } catch (err) {
-      console.error('Error loading upcoming movies:', err);
-      setError('Error al cargar próximos estrenos');
     }
   }, []);
 
@@ -88,9 +58,7 @@ export const useHomeMovies = (): UseHomeMoviesReturn => {
     try {
       // Cargar todas las secciones en paralelo
       await Promise.all([
-        loadPopularMovies(),
         loadTrendingMovies(),
-        loadUpcomingMovies(),
         loadTopRatedMovies(),
       ]);
     } catch (err) {
@@ -100,9 +68,7 @@ export const useHomeMovies = (): UseHomeMoviesReturn => {
       setRefreshing(false);
     }
   }, [
-    loadPopularMovies,
     loadTrendingMovies,
-    loadUpcomingMovies,
     loadTopRatedMovies,
   ]);
 
@@ -116,9 +82,7 @@ export const useHomeMovies = (): UseHomeMoviesReturn => {
 
       try {
         await Promise.all([
-          loadPopularMovies(),
           loadTrendingMovies(),
-          loadUpcomingMovies(),
           loadTopRatedMovies(),
         ]);
       } catch (err) {
@@ -134,9 +98,7 @@ export const useHomeMovies = (): UseHomeMoviesReturn => {
   }, []); // Solo cargar una vez al montar
 
   return {
-    popularMovies,
     trendingMovies,
-    upcomingMovies,
     topRatedMovies,
     error,
     refreshing,
