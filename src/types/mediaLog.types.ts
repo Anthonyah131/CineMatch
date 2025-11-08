@@ -8,8 +8,8 @@ export type MediaType = 'movie' | 'tv';
  * Timestamp de Firestore
  */
 export interface FirestoreTimestamp {
-  _seconds: number;
-  _nanoseconds: number;
+  seconds: number;
+  nanoseconds: number;
 }
 
 /**
@@ -37,6 +37,7 @@ export interface LogMediaViewDto {
   tmdbId: number;
   mediaType: MediaType;
   hadSeenBefore: boolean;
+  watchedAt?: FirestoreTimestamp;
   rating?: number;
   review?: string;
   reviewLang?: string;

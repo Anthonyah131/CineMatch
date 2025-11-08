@@ -53,6 +53,10 @@ export default function MovieDetailsScreen({ route, navigation }: MovieDetailsSc
     console.log("Share movie")
   }
 
+  const handleWriteReview = () => {
+    navigation.navigate("WriteReview", { movieDetails })
+  }
+
   // Director
   const director = credits?.crew.find((member) => member.job === "Director")
 
@@ -128,6 +132,7 @@ export default function MovieDetailsScreen({ route, navigation }: MovieDetailsSc
               isFavorite={isFavorite}
               onToggleFavorite={toggleFavorite}
               onAddToWatchlist={handleAddToWatchlist}
+              onWriteReview={handleWriteReview}
               onShare={handleShare}
             />
           </View>

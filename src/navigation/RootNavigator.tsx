@@ -5,6 +5,8 @@ import AuthStack from './stacks/AuthStack';
 import AppTabs from './tabs/AppTabs';
 import { useAuth } from '../context/AuthContext';
 import MovieDetailsScreen from '../screens/movies/MovieDetailsScreen';
+import WriteReviewScreen from '../screens/movies/WriteReviewScreen';
+import type { TmdbMovieDetails } from '../types/tmdb.types';
 
 /**
  * 🗂️ Root Stack Param List
@@ -14,12 +16,14 @@ import MovieDetailsScreen from '../screens/movies/MovieDetailsScreen';
  * - App: Tab Navigator (Home, Search, Profile) con sidebar
  * - Pantallas adicionales SIN tabs ni sidebar:
  *   - MovieDetails: Detalles de película
+ *   - WriteReview: Escribir review de película
  *   - ... aquí agregas más pantallas que no necesiten tabs
  */
 export type RootStackParamList = {
   Auth: undefined;
   App: undefined;
   MovieDetails: { movieId: number };
+  WriteReview: { movieDetails: TmdbMovieDetails };
   // Aquí puedes agregar más pantallas sin tabs:
   // TVShowDetails: { tvShowId: number };
   // PersonDetails: { personId: number };
@@ -56,6 +60,14 @@ export default function RootNavigator() {
             options={{
               presentation: 'card',
               animation: 'slide_from_right',
+            }}
+          />
+          <Stack.Screen
+            name="WriteReview"
+            component={WriteReviewScreen}
+            options={{
+              presentation: 'card',
+              animation: 'slide_from_bottom',
             }}
           />
           {/* Aquí agregas más pantallas sin tabs */}
