@@ -3,7 +3,7 @@ import { View, Text, Image, TouchableOpacity, StyleSheet } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { COLORS } from '../../config/colors';
 import type { MediaLog } from '../../types/mediaLog.types';
-import { mediaLogsService } from '../../services/mediaLogsService';
+import { formatWatchDate } from '../../utils/dateFormatter';
 
 interface DiaryLogItemProps {
   log: MediaLog;
@@ -22,7 +22,7 @@ export default function DiaryLogItem({
     ? `https://image.tmdb.org/t/p/w200${posterPath}`
     : null;
 
-  const watchDate = mediaLogsService.formatWatchDate(log.watchedAt);
+  const watchDate = formatWatchDate(log.watchedAt);
 
   const renderStars = () => {
     if (!log.rating) return null;

@@ -3,28 +3,63 @@
  */
 
 /**
- * Formatea una fecha a formato corto: "7 nov 2025"
- * @param date - Fecha a formatear
- * @returns String con formato "día mes año"
+ * Interface para timestamps de Firestore
  */
-export function formatShortDate(date: Date): string {
-  const day = date.getDate();
+export interface FirestoreTimestamp {
+  seconds?: number;
+  nanoseconds?: number;
+  _seconds?: number;
+  _nanoseconds?: number;
+}
+
+/**
+ * Convierte un FirestoreTimestamp a Date
+ * @param timestamp - Timestamp de Firestore
+ * @returns Date object o null si hay error
+ */
+export function timestampToDate(timestamp: FirestoreTimestamp | Date | any): Date | null {
+  if (!timestamp) return null;
+
+  try {
+    // Si ya es una Date
+    if (timestamp instanceof Date) {
+      return timestamp;
+    }
+
+    // Si tiene seconds o _seconds (Firestore timestamp)
+    const seconds = timestamp.seconds ?? timestamp._seconds;
+    if (seconds !== undefined) {
+      return new Date(seconds * 1000);
+    }
+
+    // Intentar convertir directamente
+    const date = new Date(timestamp);
+    if (!isNaN(date.getTime())) {
+      return date;
+    }
+
+    return null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Formatea una fecha a formato corto: "7 nov 2025"
+ * @param date - Fecha a formatear (Date, FirestoreTimestamp, o cualquier valor convertible)
+ * @returns String con formato "día mes año" o "Unknown date"
+ */
+export function formatShortDate(date: Date | FirestoreTimestamp | any): string {
+  const dateObj = timestampToDate(date);
+  if (!dateObj) return 'Unknown date';
+
+  const day = dateObj.getDate();
   const monthNames = [
-    'ene',
-    'feb',
-    'mar',
-    'abr',
-    'may',
-    'jun',
-    'jul',
-    'ago',
-    'sep',
-    'oct',
-    'nov',
-    'dic',
+    'ene', 'feb', 'mar', 'abr', 'may', 'jun',
+    'jul', 'ago', 'sep', 'oct', 'nov', 'dic',
   ];
-  const month = monthNames[date.getMonth()];
-  const year = date.getFullYear();
+  const month = monthNames[dateObj.getMonth()];
+  const year = dateObj.getFullYear();
 
   return `${day} ${month} ${year}`;
 }
@@ -32,13 +67,36 @@ export function formatShortDate(date: Date): string {
 /**
  * Formatea una fecha a formato largo: "7 de noviembre de 2025"
  * @param date - Fecha a formatear
- * @returns String con formato largo en español
+ * @returns String con formato largo en español o "Unknown date"
  */
-export function formatLongDate(date: Date): string {
-  return date.toLocaleDateString('es-ES', {
+export function formatLongDate(date: Date | FirestoreTimestamp | any): string {
+  const dateObj = timestampToDate(date);
+  if (!dateObj) return 'Unknown date';
+
+  return dateObj.toLocaleDateString('es-ES', {
     day: 'numeric',
     month: 'long',
     year: 'numeric',
+  });
+}
+
+/**
+ * Formatea una fecha de Firestore a string legible (inglés)
+ * @param timestamp - Timestamp de Firestore o Date
+ * @param locale - Locale para el formato (default: 'en-US')
+ * @returns Fecha formateada o 'Unknown date' si hay error
+ */
+export function formatWatchDate(
+  timestamp: FirestoreTimestamp | Date | any,
+  locale: string = 'en-US'
+): string {
+  const dateObj = timestampToDate(timestamp);
+  if (!dateObj) return 'Unknown date';
+
+  return dateObj.toLocaleDateString(locale, {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
   });
 }
 
@@ -47,9 +105,12 @@ export function formatLongDate(date: Date): string {
  * @param date - Fecha a formatear
  * @returns String con formato relativo
  */
-export function formatRelativeDate(date: Date): string {
+export function formatRelativeDate(date: Date | FirestoreTimestamp | any): string {
+  const dateObj = timestampToDate(date);
+  if (!dateObj) return 'Unknown date';
+
   const now = new Date();
-  const diffTime = now.getTime() - date.getTime();
+  const diffTime = now.getTime() - dateObj.getTime();
   const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
 
   if (diffDays === 0) return 'Hoy';
@@ -73,10 +134,13 @@ export function formatRelativeDate(date: Date): string {
  * @param date - Fecha a formatear
  * @returns String en formato ISO date
  */
-export function formatInputDate(date: Date): string {
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const day = String(date.getDate()).padStart(2, '0');
+export function formatInputDate(date: Date | FirestoreTimestamp | any): string {
+  const dateObj = timestampToDate(date);
+  if (!dateObj) return '';
+
+  const year = dateObj.getFullYear();
+  const month = String(dateObj.getMonth() + 1).padStart(2, '0');
+  const day = String(dateObj.getDate()).padStart(2, '0');
 
   return `${year}-${month}-${day}`;
 }

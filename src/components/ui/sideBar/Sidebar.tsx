@@ -86,7 +86,8 @@ export default function Sidebar({
           icon="book-outline"
           onPress={() => {
             if (onClose) onClose();
-            navigation.navigate('Diary');
+            // Navegar dentro del Home Stack
+            navigation.navigate('HomeTab', { screen: 'Diary' });
           }}
           active={currentScreen === 'Diary'}
         />

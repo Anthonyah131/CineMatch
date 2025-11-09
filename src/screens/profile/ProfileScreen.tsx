@@ -53,11 +53,10 @@ export default function ProfileScreen({ navigation }: any) {
 
   const recentlyWatchedLogs = recentLogs.slice(0, 10);
 
-  const recentlyWatchedMovies: TmdbMovie[] = recentlyWatchedLogs.map((log, index) => {
+  const recentlyWatchedMovies: TmdbMovie[] = recentlyWatchedLogs.map(log => {
     const cached = movieCache[log.tmdbId];
     return {
-      // Usar index en el ID para que cada log sea único, incluso si es la misma película
-      id: log.tmdbId * 10000 + index, // Combinar tmdbId con index para ID único
+      id: log.tmdbId,
       title: cached?.title || `Movie ${log.tmdbId}`,
       poster_path: cached?.posterPath || null,
       backdrop_path: null,
@@ -75,13 +74,11 @@ export default function ProfileScreen({ navigation }: any) {
   });
 
   // Construir datos de usuario para las películas recientes
-  // Usar el ID único (tmdbId * 10000 + index) para mapear cada log individual
   const recentMoviesUserData: {
     [movieId: number]: { rating?: number; hadSeenBefore?: boolean };
   } = {};
-  recentlyWatchedLogs.forEach((log, index) => {
-    const uniqueId = log.tmdbId * 10000 + index;
-    recentMoviesUserData[uniqueId] = {
+  recentlyWatchedLogs.forEach(log => {
+    recentMoviesUserData[log.tmdbId] = {
       rating: log.rating,
       hadSeenBefore: log.hadSeenBefore,
     };
@@ -101,11 +98,7 @@ export default function ProfileScreen({ navigation }: any) {
   };
 
   const handleMoviePress = (movie: TmdbMovie) => {
-    // Extraer el tmdbId real del ID único (dividir por 10000 y obtener parte entera)
-    const actualTmdbId = Math.floor(movie.id / 10000);
-    // Si el ID es menor a 10000, es un ID normal (favoritos)
-    const movieId = movie.id < 10000 ? movie.id : actualTmdbId;
-    navigation.navigate('MovieDetails', { movieId });
+    navigation.navigate('MovieDetails', { movieId: movie.id });
   };
 
   useEffect(() => {

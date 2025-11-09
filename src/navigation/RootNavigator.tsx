@@ -10,8 +10,6 @@ import { ChatScreen } from '../screens/chats/ChatScreen';
 import { MatchesScreen } from '../screens/matches/MatchesScreen';
 import SettingsScreen from '../screens/settings/SettingsScreen';
 import PlansScreen from '../screens/settings/PlansScreen';
-import DiaryScreen from '../screens/diary/DiaryScreen';
-import LogDetailScreen from '../screens/diary/LogDetailScreen';
 import type { TmdbMovieDetails } from '../types/tmdb.types';
 import { COLORS } from '../config/colors';
 
@@ -28,8 +26,6 @@ import { COLORS } from '../config/colors';
  *   - Matches: Pantalla de matches con otros usuarios
  *   - Settings: Configuración de la aplicación
  *   - Plans: Planes de suscripción
- *   - Diary: Diario de logs de visualización
- *   - LogDetail: Detalles de un log específico
  */
 export type RootStackParamList = {
   Auth: undefined;
@@ -40,8 +36,6 @@ export type RootStackParamList = {
   Matches: undefined;
   Settings: undefined;
   Plans: undefined;
-  Diary: undefined;
-  LogDetail: { logId: string };
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -110,22 +104,6 @@ export default function RootNavigator() {
           <Stack.Screen
             name="Plans"
             component={PlansScreen}
-            options={{
-              presentation: 'card',
-              animation: 'slide_from_right',
-            }}
-          />
-          <Stack.Screen
-            name="Diary"
-            component={DiaryScreen}
-            options={{
-              presentation: 'card',
-              animation: 'slide_from_right',
-            }}
-          />
-          <Stack.Screen
-            name="LogDetail"
-            component={LogDetailScreen}
             options={{
               presentation: 'card',
               animation: 'slide_from_right',

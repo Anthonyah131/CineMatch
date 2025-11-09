@@ -1,9 +1,12 @@
 import { useState, useEffect, useCallback } from 'react';
 import { mediaLogsService } from '../../services/mediaLogsService';
+import { mediaCacheService } from '../../services/mediaCacheService';
 import type { MediaLog } from '../../types/mediaLog.types';
+import type { MediaCache } from '../../types/mediaCache.types';
 
 interface UseLogDetailsResult {
   log: MediaLog | null;
+  mediaData: MediaCache | null;
   isLoading: boolean;
   error: string | null;
   refreshLog: () => Promise<void>;
@@ -12,6 +15,7 @@ interface UseLogDetailsResult {
 
 export function useLogDetails(logId: string): UseLogDetailsResult {
   const [log, setLog] = useState<MediaLog | null>(null);
+  const [mediaData, setMediaData] = useState<MediaCache | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -26,6 +30,20 @@ export function useLogDetails(logId: string): UseLogDetailsResult {
       setError(null);
       const fetchedLog = await mediaLogsService.getLogById(logId);
       setLog(fetchedLog);
+
+      // Fetch media data from cache
+      if (fetchedLog) {
+        try {
+          const response = fetchedLog.mediaType === 'movie'
+            ? await mediaCacheService.getMovie(fetchedLog.tmdbId)
+            : await mediaCacheService.getTVShow(fetchedLog.tmdbId);
+          
+          setMediaData(response.data);
+        } catch (err) {
+          console.error('Error fetching media data:', err);
+          // No establecemos error aquí, solo log
+        }
+      }
     } catch (err) {
       console.error('Error fetching log details:', err);
       setError('Failed to load log details');
@@ -56,6 +74,7 @@ export function useLogDetails(logId: string): UseLogDetailsResult {
 
   return {
     log,
+    mediaData,
     isLoading,
     error,
     refreshLog,

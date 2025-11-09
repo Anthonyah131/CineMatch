@@ -6,73 +6,67 @@ import {
   StyleSheet,
   RefreshControl,
   ActivityIndicator,
+  TouchableOpacity,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import type { RootStackParamList } from '../../navigation/RootNavigator';
+import type { HomeStackParamList } from '../../navigation/stacks/HomeStack';
+import Icon from 'react-native-vector-icons/Ionicons';
 import { COLORS } from '../../config/colors';
 import { useDiaryLogs } from '../../hooks/diary/useDiaryLogs';
 import DiaryLogItem from '../../components/diary/DiaryLogItem';
 import EmptyDiary from '../../components/diary/EmptyDiary';
-import { tmdbService } from '../../services/tmdbService';
+import { mediaCacheService } from '../../services/mediaCacheService';
 import type { MediaLog } from '../../types/mediaLog.types';
+import type { MediaCache } from '../../types/mediaCache.types';
 
 export default function DiaryScreen() {
-  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+  const navigation = useNavigation<NativeStackNavigationProp<HomeStackParamList>>();
   const { logs, isLoading, error, refreshLogs, hasMore, loadMore } = useDiaryLogs(20);
-  const [movieTitles, setMovieTitles] = useState<Record<string, { title: string; posterPath?: string }>>({});
+  const [mediaCache, setMediaCache] = useState<Record<string, MediaCache>>({});
   const [loadingMore, setLoadingMore] = useState(false);
 
-  // Fetch movie/show titles and posters for all logs
+  // Fetch media data from cache
   useEffect(() => {
-    const fetchTitles = async () => {
-      const titlePromises = logs.map(async (log) => {
+    const fetchMediaData = async () => {
+      const cachePromises = logs.map(async (log) => {
         const cacheKey = `${log.tmdbId}-${log.mediaType}`;
-        if (movieTitles[cacheKey]) return null;
+        if (mediaCache[cacheKey]) return null;
 
         try {
-          if (log.mediaType === 'movie') {
-            const data = await tmdbService.movies.getDetails(log.tmdbId);
-            return {
-              key: cacheKey,
-              title: data.title || 'Unknown Title',
-              posterPath: data.poster_path || undefined,
-            };
-          } else {
-            const data = await tmdbService.tv.getDetails(log.tmdbId);
-            return {
-              key: cacheKey,
-              title: data.name || 'Unknown Title',
-              posterPath: data.poster_path || undefined,
-            };
-          }
-        } catch (err) {
-          console.error(`Error fetching title for ${log.tmdbId}:`, err);
-          return { key: cacheKey, title: 'Unknown Title', posterPath: undefined };
-        }
-      });
-
-      const results = await Promise.all(titlePromises);
-      const newTitles: Record<string, { title: string; posterPath?: string }> = {};
-      results.forEach((result) => {
-        if (result && result.posterPath !== undefined) {
-          newTitles[result.key] = {
-            title: result.title,
-            posterPath: result.posterPath,
+          const response = log.mediaType === 'movie'
+            ? await mediaCacheService.getMovie(log.tmdbId)
+            : await mediaCacheService.getTVShow(log.tmdbId);
+          
+          return {
+            key: cacheKey,
+            data: response.data,
           };
+        } catch (err) {
+          console.error(`Error fetching cache for ${log.tmdbId}:`, err);
+          return null;
         }
       });
 
-      if (Object.keys(newTitles).length > 0) {
-        setMovieTitles((prev) => ({ ...prev, ...newTitles }));
+      const results = await Promise.all(cachePromises);
+      const newCache: Record<string, MediaCache> = {};
+      results.forEach((result) => {
+        if (result) {
+          newCache[result.key] = result.data;
+        }
+      });
+
+      if (Object.keys(newCache).length > 0) {
+        setMediaCache((prev) => ({ ...prev, ...newCache }));
       }
     };
 
     if (logs.length > 0) {
-      fetchTitles();
+      fetchMediaData();
     }
-  }, [logs, movieTitles]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [logs]);
 
   const handleLogPress = (log: MediaLog) => {
     navigation.navigate('LogDetail', { logId: log.id });
@@ -98,10 +92,15 @@ export default function DiaryScreen() {
     <SafeAreaView style={styles.container} edges={['top']}>
       {/* Header */}
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>My Diary</Text>
-        <Text style={styles.headerSubtitle}>
-          {logs.length} {logs.length === 1 ? 'entry' : 'entries'}
-        </Text>
+        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+          <Icon name="arrow-back" size={24} color={COLORS.text} />
+        </TouchableOpacity>
+        <View style={styles.headerContent}>
+          <Text style={styles.headerTitle}>My Diary</Text>
+          <Text style={styles.headerSubtitle}>
+            {logs.length} {logs.length === 1 ? 'entry' : 'entries'}
+          </Text>
+        </View>
       </View>
 
       {/* Error State */}
@@ -125,13 +124,13 @@ export default function DiaryScreen() {
           keyExtractor={(item) => item.id}
           renderItem={({ item }) => {
             const cacheKey = `${item.tmdbId}-${item.mediaType}`;
-            const mediaData = movieTitles[cacheKey];
+            const media = mediaCache[cacheKey];
             return (
               <DiaryLogItem
                 log={item}
                 onPress={handleLogPress}
-                movieTitle={mediaData?.title}
-                posterPath={mediaData?.posterPath}
+                movieTitle={media?.title}
+                posterPath={media?.posterPath}
               />
             );
           }}
@@ -159,10 +158,19 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.background,
   },
   header: {
+    flexDirection: 'row',
+    alignItems: 'center',
     paddingHorizontal: 20,
     paddingVertical: 16,
     borderBottomWidth: 1,
     borderBottomColor: COLORS.border,
+    gap: 12,
+  },
+  backButton: {
+    padding: 4,
+  },
+  headerContent: {
+    flex: 1,
   },
   headerTitle: {
     fontSize: 28,
