@@ -8,6 +8,10 @@ import MovieDetailsScreen from '../screens/movies/MovieDetailsScreen';
 import WriteReviewScreen from '../screens/movies/WriteReviewScreen';
 import { ChatScreen } from '../screens/chats/ChatScreen';
 import { MatchesScreen } from '../screens/matches/MatchesScreen';
+import SettingsScreen from '../screens/settings/SettingsScreen';
+import PlansScreen from '../screens/settings/PlansScreen';
+import DiaryScreen from '../screens/diary/DiaryScreen';
+import LogDetailScreen from '../screens/diary/LogDetailScreen';
 import type { TmdbMovieDetails } from '../types/tmdb.types';
 import { COLORS } from '../config/colors';
 
@@ -22,6 +26,10 @@ import { COLORS } from '../config/colors';
  *   - WriteReview: Escribir review de película
  *   - Chat: Pantalla de chat individual
  *   - Matches: Pantalla de matches con otros usuarios
+ *   - Settings: Configuración de la aplicación
+ *   - Plans: Planes de suscripción
+ *   - Diary: Diario de logs de visualización
+ *   - LogDetail: Detalles de un log específico
  */
 export type RootStackParamList = {
   Auth: undefined;
@@ -30,6 +38,10 @@ export type RootStackParamList = {
   WriteReview: { movieDetails: TmdbMovieDetails };
   Chat: { chatId: string };
   Matches: undefined;
+  Settings: undefined;
+  Plans: undefined;
+  Diary: undefined;
+  LogDetail: { logId: string };
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -82,6 +94,38 @@ export default function RootNavigator() {
           <Stack.Screen
             name="Matches"
             component={MatchesScreen}
+            options={{
+              presentation: 'card',
+              animation: 'slide_from_right',
+            }}
+          />
+          <Stack.Screen
+            name="Settings"
+            component={SettingsScreen}
+            options={{
+              presentation: 'card',
+              animation: 'slide_from_right',
+            }}
+          />
+          <Stack.Screen
+            name="Plans"
+            component={PlansScreen}
+            options={{
+              presentation: 'card',
+              animation: 'slide_from_right',
+            }}
+          />
+          <Stack.Screen
+            name="Diary"
+            component={DiaryScreen}
+            options={{
+              presentation: 'card',
+              animation: 'slide_from_right',
+            }}
+          />
+          <Stack.Screen
+            name="LogDetail"
+            component={LogDetailScreen}
             options={{
               presentation: 'card',
               animation: 'slide_from_right',

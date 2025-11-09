@@ -82,18 +82,11 @@ export default function Sidebar({
           active={currentScreen === 'Home'}
         />
         <SidebarButton
-          title="Films"
-          icon="film-outline"
-          onPress={() => {
-            if (onClose) onClose();
-          }}
-          active={currentScreen === 'Films'}
-        />
-        <SidebarButton
           title="Diary"
           icon="book-outline"
           onPress={() => {
             if (onClose) onClose();
+            navigation.navigate('Diary');
           }}
           active={currentScreen === 'Diary'}
         />
@@ -131,11 +124,20 @@ export default function Sidebar({
         />
       </ScrollView>
 
-      {/* Logout */}
+      {/* Settings & Logout */}
       <View style={styles.logoutSection}>
+        <SidebarButton
+          title="Settings"
+          icon="settings-outline"
+          onPress={() => {
+            if (onClose) onClose();
+            navigation.navigate('Settings');
+          }}
+          active={currentScreen === 'Settings'}
+        />
         {isAuthenticating ? (
           <View style={styles.logoutLoading}>
-            <ActivityIndicator color="#C7A24C" />
+            <ActivityIndicator color={COLORS.primary} />
             <Text style={styles.logoutLoadingText}>Cerrando sesión...</Text>
           </View>
         ) : (
