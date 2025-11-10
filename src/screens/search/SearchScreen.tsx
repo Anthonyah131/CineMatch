@@ -1,21 +1,80 @@
 import React from 'react';
 import {
   View,
-  Text,
   StyleSheet,
-  SafeAreaView,
+  StatusBar,
+  KeyboardAvoidingView,
+  Platform,
 } from 'react-native';
-import Icon from 'react-native-vector-icons/Ionicons';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { useMovieSearch } from '../../hooks/search/useMovieSearch';
+import { SearchInput, SearchResults } from '../../components/screens/search';
 import { COLORS } from '../../config/colors';
+import type { TmdbMovie } from '../../types/tmdb.types';
 
-export const SearchScreen: React.FC = () => {
+interface SearchScreenProps {
+  navigation: any;
+}
+
+export const SearchScreen: React.FC<SearchScreenProps> = ({ navigation }) => {
+  const {
+    query,
+    movies,
+    loading,
+    error,
+    hasSearched,
+    hasMorePages,
+    searchMovies,
+    loadMoreMovies,
+    clearSearch,
+    setQuery,
+  } = useMovieSearch();
+
+  const handleMoviePress = (movie: TmdbMovie) => {
+    navigation.navigate('MovieDetails', { movieId: movie.id });
+  };
+
+  const handleRetry = () => {
+    if (query.trim()) {
+      searchMovies(query);
+    }
+  };
+
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.content}>
-        <Icon name="search-outline" size={64} color={COLORS.primary} />
-        <Text style={styles.title}>Buscar</Text>
-        <Text style={styles.subtitle}>Próximamente...</Text>
-      </View>
+    <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
+      <StatusBar
+        barStyle="light-content"
+        backgroundColor={COLORS.background}
+        translucent={false}
+      />
+      
+      <KeyboardAvoidingView 
+        style={styles.keyboardContainer}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      >
+        <View style={styles.header}>
+          <SearchInput
+            value={query}
+            onChangeText={setQuery}
+            onClear={clearSearch}
+            loading={loading}
+            placeholder="Buscar películas..."
+          />
+        </View>
+
+        <View style={styles.content}>
+          <SearchResults
+            movies={movies}
+            loading={loading}
+            error={error}
+            hasSearched={hasSearched}
+            hasMorePages={hasMorePages}
+            onMoviePress={handleMoviePress}
+            onLoadMore={loadMoreMovies}
+            onRetry={handleRetry}
+          />
+        </View>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 };
@@ -25,20 +84,16 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: COLORS.background,
   },
+  keyboardContainer: {
+    flex: 1,
+  },
+  header: {
+    backgroundColor: COLORS.background,
+    borderBottomWidth: 1,
+    borderBottomColor: COLORS.border,
+  },
   content: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  title: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    color: COLORS.text,
-    marginTop: 16,
-  },
-  subtitle: {
-    fontSize: 16,
-    color: COLORS.textSecondary,
-    marginTop: 8,
+    paddingTop: 8,
   },
 });
