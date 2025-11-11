@@ -83,6 +83,59 @@ export interface UserProfile {
 }
 
 /**
+ * Respuesta completa del perfil de usuario (nuevo endpoint)
+ */
+export interface CompleteUserProfileResponse {
+  user: {
+    displayName: string;
+    email: string;
+    photoURL: string;
+    bio?: string;
+    birthdate?: string;
+    followersCount: number;
+    followingCount: number;
+    createdAt: string;
+    updatedAt: string;
+  };
+  stats: {
+    totalFavorites: number;
+    followersCount: number;
+    followingCount: number;
+    totalMoviesWatched: number;
+    totalTvShowsWatched: number;
+    totalViews: number;
+    totalReviews: number;
+    averageRating: number; // 0-5 scale
+  };
+  recentFavorites: Array<{
+    tmdbId: number;
+    title: string;
+    mediaType: MediaType;
+    posterPath: string;
+    addedAt: string;
+  }>;
+  recentLogs: Array<{
+    id: string;
+    tmdbId: number;
+    mediaType: MediaType;
+    rating?: number; // 1-5
+    review?: string; // Truncated to 100 chars + "..." if longer
+    watchedAt: string;
+    hadSeenBefore: boolean;
+  }>;
+  recentReviews: Array<{
+    id: string;
+    tmdbId: number;
+    mediaType: MediaType;
+    rating: number; // 1-5
+    review: string; // Full review content
+    reviewLang?: string;
+    watchedAt: string;
+    createdAt: string;
+  }>;
+}
+
+/**
  * DTO para crear usuario
  */
 export interface CreateUserDto {

@@ -61,6 +61,6 @@ export const getInitialReviewValues = (movieId: number) => ({
  * Helper para convertir Date a FirestoreTimestamp
  */
 export const dateToFirestoreTimestamp = (date: Date) => ({
-  seconds: Math.floor(date.getTime() / 1000),
-  nanoseconds: 0,
+  _seconds: Math.floor(date.getTime() / 1000),
+  _nanoseconds: 0,
 });

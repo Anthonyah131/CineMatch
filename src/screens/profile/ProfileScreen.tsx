@@ -16,6 +16,8 @@ import ProfileHeader from '../../components/profile/ProfileHeader';
 import ReviewCard from '../../components/profile/ReviewCard';
 import MovieCarousel from '../../components/ui/carousel/MovieCarousel';
 import type { TmdbMovie } from '../../types/tmdb.types';
+import type { NativeStackScreenProps } from '@react-navigation/native-stack';
+import type { ProfileStackParamList } from '../../navigation/stacks/ProfileStack';
 
 interface MovieCache {
   [tmdbId: number]: {
@@ -24,7 +26,9 @@ interface MovieCache {
   };
 }
 
-export default function ProfileScreen({ navigation }: any) {
+type ProfileScreenProps = NativeStackScreenProps<ProfileStackParamList, 'ProfileMain'>;
+
+export default function ProfileScreen({ navigation }: ProfileScreenProps) {
   const { user, favorites, recentLogs, stats, isLoading, error, refresh } =
     useProfile();
   const [refreshing, setRefreshing] = useState(false);
@@ -32,6 +36,18 @@ export default function ProfileScreen({ navigation }: any) {
 
   const handleBack = () => {
     navigation.goBack();
+  };
+
+  const handleFollowersPress = () => {
+    if (user?.id) {
+      navigation.navigate('FollowList', { type: 'followers', userId: user.id });
+    }
+  };
+
+  const handleFollowingPress = () => {
+    if (user?.id) {
+      navigation.navigate('FollowList', { type: 'following', userId: user.id });
+    }
   };
 
   const favoritesAsMovies: TmdbMovie[] = favorites.map(fav => ({
@@ -53,10 +69,10 @@ export default function ProfileScreen({ navigation }: any) {
 
   const recentlyWatchedLogs = recentLogs.slice(0, 10);
 
-  const recentlyWatchedMovies: TmdbMovie[] = recentlyWatchedLogs.map(log => {
+  const recentlyWatchedMovies: TmdbMovie[] = recentlyWatchedLogs.map((log, index) => {
     const cached = movieCache[log.tmdbId];
     return {
-      id: log.tmdbId,
+      id: log.tmdbId + index * 1000000, // Create unique IDs to avoid collision
       title: cached?.title || `Movie ${log.tmdbId}`,
       poster_path: cached?.posterPath || null,
       backdrop_path: null,
@@ -77,8 +93,9 @@ export default function ProfileScreen({ navigation }: any) {
   const recentMoviesUserData: {
     [movieId: number]: { rating?: number; hadSeenBefore?: boolean };
   } = {};
-  recentlyWatchedLogs.forEach(log => {
-    recentMoviesUserData[log.tmdbId] = {
+  recentlyWatchedLogs.forEach((log, index) => {
+    const uniqueId = log.tmdbId + index * 1000000; // Same unique ID system
+    recentMoviesUserData[uniqueId] = {
       rating: log.rating,
       hadSeenBefore: log.hadSeenBefore,
     };
@@ -98,7 +115,9 @@ export default function ProfileScreen({ navigation }: any) {
   };
 
   const handleMoviePress = (movie: TmdbMovie) => {
-    navigation.navigate('MovieDetails', { movieId: movie.id });
+    // Extract original tmdbId from the potentially modified ID
+    const originalTmdbId = movie.id >= 1000000 ? movie.id % 1000000 : movie.id;
+    navigation.navigate('MovieDetails', { movieId: originalTmdbId });
   };
 
   useEffect(() => {
@@ -188,6 +207,8 @@ export default function ProfileScreen({ navigation }: any) {
         followingCount={user.followingCount}
         stats={stats}
         favorites={favorites}
+        onFollowersPress={handleFollowersPress}
+        onFollowingPress={handleFollowingPress}
       />
 
       {favorites.length > 0 && (

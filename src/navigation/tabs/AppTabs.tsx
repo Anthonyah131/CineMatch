@@ -5,8 +5,8 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import { GameScreen } from '../../screens/game/GameScreen';
 import { SearchScreen } from '../../screens/search/SearchScreen';
 import HomeStack from '../stacks/HomeStack';
-import { ChatsListScreen } from '../../screens/chats/ChatsListScreen';
-import ProfileScreen from '../../screens/profile/ProfileScreen';
+import ChatStack from '../stacks/ChatStack';
+import ProfileStack from '../stacks/ProfileStack';
 import { COLORS } from '../../config/colors';
 
 /**
@@ -73,12 +73,12 @@ export default function AppTabs() {
       />
       <Tab.Screen
         name="ChatsTab"
-        component={ChatsListScreen}
+        component={ChatStack}
         options={{ tabBarLabel: 'Chats' }}
       />
-      <Tab.Screen
-        name="ProfileTab"
-        component={ProfileScreen}
+      <Tab.Screen 
+        name="ProfileTab" 
+        component={ProfileStack}
         options={{ tabBarLabel: 'Perfil' }}
       />
     </Tab.Navigator>

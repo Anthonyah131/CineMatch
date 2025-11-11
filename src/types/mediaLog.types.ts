@@ -8,8 +8,8 @@ export type MediaType = 'movie' | 'tv';
  * Timestamp de Firestore
  */
 export interface FirestoreTimestamp {
-  seconds: number;
-  nanoseconds: number;
+  _seconds: number;
+  _nanoseconds: number;
 }
 
 /**

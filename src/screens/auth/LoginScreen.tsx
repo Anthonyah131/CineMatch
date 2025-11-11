@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import {
   View,
   Text,
@@ -9,15 +9,11 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
-import CustomInput from '../../components/ui/inputs/CustomInput';
-import CustomButton from '../../components/ui/buttons/CustomButton';
 import { useAuth } from '../../context/AuthContext';
 import { COLORS } from '../../config/colors';
 
-export default function LoginScreen({ navigation }: any) {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const { loginWithGoogle, loginWithEmail, isAuthenticating, error, clearError } = useAuth();
+export default function LoginScreen() {
+  const { loginWithGoogle, isAuthenticating, error, clearError } = useAuth();
 
   // Mostrar errores
   useEffect(() => {
@@ -32,21 +28,6 @@ export default function LoginScreen({ navigation }: any) {
       // La navegación se manejará automáticamente por el RootNavigator
     } catch (err) {
       // El error ya se muestra en el useEffect
-    }
-  };
-
-  const handleEmailLogin = async () => {
-    if (!email || !password) {
-      Alert.alert('Error', 'Por favor ingresa email y contraseña');
-      return;
-    }
-
-    try {
-      await loginWithEmail(email, password);
-      // La navegación se manejará automáticamente por el RootNavigator
-    } catch (err) {
-      // El error ya se muestra en el useEffect
-      console.error('Error en email login:', err);
     }
   };
 
@@ -70,41 +51,7 @@ export default function LoginScreen({ navigation }: any) {
 
         {/* Login form */}
         <Text style={styles.header}>Login</Text>
-        <Text style={styles.subheader}>Please sign in to continue.</Text>
-
-        <CustomInput
-          placeholder="Email"
-          value={email}
-          onChangeText={setEmail}
-          iconName="mail-outline"
-        />
-        <CustomInput
-          placeholder="Password"
-          value={password}
-          onChangeText={setPassword}
-          iconName="lock-closed-outline"
-          secureTextEntry
-        />
-
-        {/* Forgot password */}
-        <TouchableOpacity>
-          <Text style={styles.forgot}>Forgot Password?</Text>
-        </TouchableOpacity>
-
-        <CustomButton
-          title={isAuthenticating ? 'Iniciando sesión...' : 'Login'}
-          onPress={handleEmailLogin}
-          backgroundColor="#E69CA3"
-          textColor="#1A1A1A"
-          disabled={isAuthenticating}
-        />
-
-        {/* Separator */}
-        <View style={styles.separatorContainer}>
-          <View style={styles.separatorLine} />
-          <Text style={styles.separatorText}>O continua con</Text>
-          <View style={styles.separatorLine} />
-        </View>
+        <Text style={styles.subheader}>Inicia sesión con tu cuenta de Google</Text>
 
         {/* Google Sign-In Button */}
         <TouchableOpacity
@@ -124,7 +71,8 @@ export default function LoginScreen({ navigation }: any) {
           )}
         </TouchableOpacity>
 
-        <Text style={styles.footerText}>
+        {/* Removed Sign Up link - registration disabled for now */}
+        {/* <Text style={styles.footerText}>
           Don't have an account?{' '}
           <Text
             style={styles.link}
@@ -133,7 +81,7 @@ export default function LoginScreen({ navigation }: any) {
             Sign Up
           </Text>{' '}
           first.
-        </Text>
+        </Text> */}
       </View>
     </ImageBackground>
   );

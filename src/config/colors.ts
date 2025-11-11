@@ -4,7 +4,7 @@
  */
 export const COLORS = {
   // Main backgrounds
-  background: '#0F0B0A',
+  background: '#050403ff',
   surface: '#1A1412',
 
   // Primary brand colors

@@ -98,7 +98,7 @@ class MediaLogsService {
    * Formatear fecha de timestamp Firestore
    */
   formatWatchDate(timestamp: FirestoreTimestamp): string {
-    const date = new Date(timestamp.seconds * 1000);
+    const date = new Date(timestamp._seconds * 1000);
     return date.toLocaleDateString('es-ES', {
       year: 'numeric',
       month: 'long',

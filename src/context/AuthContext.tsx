@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect, useState, useRef } from 'react';
 import auth, { FirebaseAuthTypes } from '@react-native-firebase/auth';
 import {
   signInWithGoogle as googleSignIn,
@@ -16,6 +16,8 @@ import {
   clearStorage,
 } from '../services/storageService';
 import { authEvents } from '../services/api/apiClient';
+import { usersService } from '../services/usersService';
+import type { User } from '../types/user.types';
 
 interface AppUser {
   id: string;
@@ -26,6 +28,7 @@ interface AppUser {
 
 interface AuthContextType {
   user: AppUser | null;
+  fullUserData: User | null;
   firebaseUser: FirebaseAuthTypes.User | null;
   appToken: string | null;
   isInitializing: boolean;
@@ -41,10 +44,12 @@ interface AuthContextType {
   logout: () => Promise<void>;
   error: string | null;
   clearError: () => void;
+  refreshUserData: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType>({
   user: null,
+  fullUserData: null,
   firebaseUser: null,
   appToken: null,
   isInitializing: true,
@@ -56,6 +61,7 @@ const AuthContext = createContext<AuthContextType>({
   logout: async () => {},
   error: null,
   clearError: () => {},
+  refreshUserData: async () => {},
 });
 
 export const useAuth = () => {
@@ -70,12 +76,44 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
   const [user, setUser] = useState<AppUser | null>(null);
+  const [fullUserData, setFullUserData] = useState<User | null>(null);
   const [firebaseUser, setFirebaseUser] =
     useState<FirebaseAuthTypes.User | null>(null);
   const [appToken, setAppToken] = useState<string | null>(null);
   const [isInitializing, setIsInitializing] = useState(true);
   const [isAuthenticating, setIsAuthenticating] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  
+  // Variable para controlar el debounce del refresh
+  const refreshTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Función para cargar datos completos del usuario desde el backend
+  const loadFullUserData = async (userId: string) => {
+    try {
+      console.log('📥 Cargando datos completos del usuario:', userId);
+      const userData = await usersService.getUserById(userId);
+      setFullUserData(userData);
+      console.log('✅ Datos del usuario cargados:', userData.displayName);
+    } catch (err) {
+      console.error('❌ Error al cargar datos del usuario:', err);
+    }
+  };
+
+  // Función pública para refrescar datos del usuario (con debounce)
+  const refreshUserData = async () => {
+    if (!user?.id) return;
+
+    // Cancelar el timeout anterior si existe
+    if (refreshTimeoutRef.current) {
+      clearTimeout(refreshTimeoutRef.current);
+    }
+
+    // Crear nuevo timeout de 500ms
+    refreshTimeoutRef.current = setTimeout(() => {
+      loadFullUserData(user.id);
+      refreshTimeoutRef.current = null;
+    }, 500);
+  };
 
   // Inicializar: cargar datos guardados y escuchar cambios de Firebase
   useEffect(() => {
@@ -88,6 +126,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         if (savedToken && savedUser) {
           setAppToken(savedToken);
           setUser(savedUser);
+          
+          // Cargar datos completos del usuario desde el backend
+          await loadFullUserData(savedUser.id);
         }
       } catch (err) {
         console.error('Error al inicializar auth:', err);
@@ -137,6 +178,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     setAppToken(response.token);
     setUser(response.user);
     setError(null);
+    
+    // Cargar datos completos del usuario desde el backend
+    await loadFullUserData(response.user.id);
   };
 
   const loginWithGoogle = async () => {
@@ -145,9 +189,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       setError(null);
       const response = await googleSignIn();
       await handleAuthResponse(response);
-    } catch (error: any) {
-      setError(error.message || 'Error al iniciar sesión con Google');
-      throw error;
+    } catch (err: any) {
+      setError(err.message || 'Error al iniciar sesión con Google');
+      throw err;
     } finally {
       setIsAuthenticating(false);
     }
@@ -159,10 +203,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       setError(null);
       const response = await googleRegister();
       await handleAuthResponse(response);
-    } catch (error: any) {
-      console.error('Error en registerWithGoogle:', error);
-      setError(error.message || 'Error al registrar con Google');
-      throw error;
+    } catch (err: any) {
+      console.error('Error en registerWithGoogle:', err);
+      setError(err.message || 'Error al registrar con Google');
+      throw err;
     } finally {
       setIsAuthenticating(false);
     }
@@ -174,10 +218,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       setError(null);
       const response = await emailSignIn(email, password);
       await handleAuthResponse(response);
-    } catch (error: any) {
-      console.error('Error en loginWithEmail:', error);
-      setError(error.message || 'Error al iniciar sesión');
-      throw error;
+    } catch (err: any) {
+      console.error('Error en loginWithEmail:', err);
+      setError(err.message || 'Error al iniciar sesión');
+      throw err;
     } finally {
       setIsAuthenticating(false);
     }
@@ -193,10 +237,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       setError(null);
       const response = await emailRegister(email, password, name);
       await handleAuthResponse(response);
-    } catch (error: any) {
-      console.error('Error en registerWithEmail:', error);
-      setError(error.message || 'Error al registrar');
-      throw error;
+    } catch (err: any) {
+      console.error('Error en registerWithEmail:', err);
+      setError(err.message || 'Error al registrar');
+      throw err;
     } finally {
       setIsAuthenticating(false);
     }
@@ -208,13 +252,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       await authSignOut();
       await clearStorage();
       setUser(null);
+      setFullUserData(null);
       setAppToken(null);
       setFirebaseUser(null);
       setError(null);
-    } catch (error: any) {
-      console.error('Error al cerrar sesión:', error);
-      setError(error.message || 'Error al cerrar sesión');
-      throw error;
+    } catch (err: any) {
+      console.error('Error al cerrar sesión:', err);
+      setError(err.message || 'Error al cerrar sesión');
+      throw err;
     } finally {
       setIsAuthenticating(false);
     }
@@ -228,6 +273,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     <AuthContext.Provider
       value={{
         user,
+        fullUserData,
         firebaseUser,
         appToken,
         isInitializing,
@@ -239,6 +285,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         logout,
         error,
         clearError,
+        refreshUserData,
       }}
     >
       {children}

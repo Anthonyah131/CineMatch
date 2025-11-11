@@ -58,8 +58,8 @@ export default function ReviewCard({
   const watchedDate =
     log.watchedAt &&
     typeof log.watchedAt === 'object' &&
-    'seconds' in log.watchedAt
-      ? new Date(log.watchedAt.seconds * 1000)
+    '_seconds' in log.watchedAt
+      ? new Date(log.watchedAt._seconds * 1000)
       : null;
 
   const formattedDate = watchedDate ? formatShortDate(watchedDate) : null;

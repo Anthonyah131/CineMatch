@@ -9,6 +9,7 @@ import {
   Image,
   TouchableOpacity,
 } from 'react-native';
+import LinearGradient from 'react-native-linear-gradient';
 import { useMovieDetails } from '../../hooks/movies/useMovieDetails';
 import Icon from 'react-native-vector-icons/Ionicons';
 import {
@@ -70,7 +71,6 @@ export default function MovieDetailsScreen({
   const handleWriteReview = () => {
     navigation.navigate('WriteReview', { movieDetails });
   };
-
   // Director
   const director = credits?.crew.find(member => member.job === 'Director');
 
@@ -128,14 +128,28 @@ export default function MovieDetailsScreen({
         {/* Backdrop Image */}
         {movieDetails.backdrop_path && (
           <View style={styles.backdropContainer}>
-            <Image
-              source={{
-                uri: buildPosterUrl(movieDetails.backdrop_path, 'w780')!,
-              }}
-              style={styles.backdropImage}
-              resizeMode="cover"
-            />
-            <View style={styles.backdropGradient} />
+            {/* Wrapper con borderRadius y overflow para evitar franjas negras en Android */}
+            <View style={styles.backdropImageWrapper}>
+              <Image
+                source={{
+                  uri: buildPosterUrl(movieDetails.backdrop_path, 'w780')!,
+                }}
+                style={styles.backdropImage}
+                resizeMode="cover"
+              />
+              {/* Sombra difusa: varios niveles que se van desvaneciendo hacia arriba */}
+              <LinearGradient
+                colors={[
+                  'rgba(0,0,0,0.9)',
+                  'rgba(0,0,0,0.6)',
+                  'rgba(0,0,0,0.35)',
+                  'rgba(0,0,0,0)',
+                ]}
+                start={{ x: 0.5, y: 1 }}
+                end={{ x: 0.5, y: 0 }}
+                style={styles.backdropGradient}
+              />
+            </View>
           </View>
         )}
 
@@ -231,16 +245,22 @@ const styles = StyleSheet.create({
   backdropImage: {
     width: '100%',
     height: '100%',
+    backgroundColor: 'transparent',
+  },
+  backdropImageWrapper: {
+    width: '100%',
+    height: '100%',
+    overflow: 'hidden',
+    backgroundColor: COLORS.background, // color que se ve detrás de la imagen
+    borderBottomLeftRadius: 24,
     borderBottomRightRadius: 200,
   },
   backdropGradient: {
     position: 'absolute',
-    bottom: 16,
-    left: 16,
-    right: 16,
-    height: '50%',
-    borderBottomLeftRadius: 24,
-    borderBottomRightRadius: 24,
+    bottom: 0,
+    left: 0,
+    right: 0,
+    height: '60%', // ajusta si quieres más o menos degradado
   },
   headerContainer: {
     position: 'absolute',

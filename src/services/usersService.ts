@@ -2,6 +2,7 @@ import { apiClient } from './api/apiClient';
 import type {
   User,
   UserProfile,
+  CompleteUserProfileResponse,
   CreateUserDto,
   UpdateUserDto,
   FavoriteItem,
@@ -30,6 +31,13 @@ class UsersService {
    */
   async getUserProfile(uid: string): Promise<UserProfile> {
     return apiClient.get<UserProfile>(`${this.baseUrl}/${uid}/profile`);
+  }
+
+  /**
+   * Obtener perfil completo del usuario con toda la información
+   */
+  async getCompleteUserProfile(uid: string): Promise<CompleteUserProfileResponse> {
+    return apiClient.get<CompleteUserProfileResponse>(`${this.baseUrl}/${uid}/complete-profile`);
   }
 
   /**

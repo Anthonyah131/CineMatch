@@ -3,7 +3,6 @@ import {
   View,
   Text,
   StyleSheet,
-  SafeAreaView,
   FlatList,
   TouchableOpacity,
   ActivityIndicator,
@@ -144,7 +143,7 @@ export const ChatsListScreen: React.FC<ChatsListScreenProps> = ({ navigation }) 
   // Loading State
   if (isLoading && chats.length === 0) {
     return (
-      <SafeAreaView style={styles.container}>
+      <View style={styles.container}>
         <View style={styles.header}>
           <Text style={styles.headerTitle}>Mensajes</Text>
         </View>
@@ -152,14 +151,14 @@ export const ChatsListScreen: React.FC<ChatsListScreenProps> = ({ navigation }) 
           <ActivityIndicator size="large" color="#C7A24C" />
           <Text style={styles.loadingText}>Cargando chats...</Text>
         </View>
-      </SafeAreaView>
+      </View>
     );
   }
 
   // Error State
   if (error) {
     return (
-      <SafeAreaView style={styles.container}>
+      <View style={styles.container}>
         <View style={styles.header}>
           <Text style={styles.headerTitle}>Mensajes</Text>
         </View>
@@ -172,14 +171,14 @@ export const ChatsListScreen: React.FC<ChatsListScreenProps> = ({ navigation }) 
             <Text style={styles.retryButtonText}>Reintentar</Text>
           </TouchableOpacity>
         </View>
-      </SafeAreaView>
+      </View>
     );
   }
 
   // Empty State
   if (chats.length === 0) {
     return (
-      <SafeAreaView style={styles.container}>
+      <View style={styles.container}>
         <View style={styles.header}>
           <Text style={styles.headerTitle}>Mensajes</Text>
         </View>
@@ -190,13 +189,13 @@ export const ChatsListScreen: React.FC<ChatsListScreenProps> = ({ navigation }) 
             Encuentra personas con tus mismos gustos en Matches
           </Text>
         </View>
-      </SafeAreaView>
+      </View>
     );
   }
 
   // Chats List
   return (
-    <SafeAreaView style={styles.container}>
+    <View style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
         {isSelectionMode ? (
@@ -241,7 +240,7 @@ export const ChatsListScreen: React.FC<ChatsListScreenProps> = ({ navigation }) 
         onRefresh={refresh}
         refreshing={isLoading}
       />
-    </SafeAreaView>
+    </View>
   );
 };
 

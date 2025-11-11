@@ -3,7 +3,6 @@ import {
   View,
   Text,
   StyleSheet,
-  SafeAreaView,
   FlatList,
   TextInput,
   TouchableOpacity,
@@ -47,6 +46,7 @@ export const ChatScreen: React.FC<ChatScreenProps> = ({ route, navigation }) => 
   const [selectedMessage, setSelectedMessage] = useState<MessageWithSender | null>(null);
   const [otherUserName, setOtherUserName] = useState<string>('Chat');
   const [otherUserPhoto, setOtherUserPhoto] = useState<string | undefined>();
+  const [otherUserId, setOtherUserId] = useState<string | null>(null);
   const flatListRef = useRef<FlatList>(null);
 
   // Cargar información del otro usuario
@@ -59,11 +59,13 @@ export const ChatScreen: React.FC<ChatScreenProps> = ({ route, navigation }) => 
       if (!currentChat) return;
 
       // Obtener el ID del otro usuario
-      const otherUserId = currentChat.members.find(memberId => memberId !== user.id);
-      if (!otherUserId) return;
+      const foundOtherUserId = currentChat.members.find(memberId => memberId !== user.id);
+      if (!foundOtherUserId) return;
+
+      setOtherUserId(foundOtherUserId);
 
       try {
-        const profile = await usersService.getUserProfile(otherUserId);
+        const profile = await usersService.getUserProfile(foundOtherUserId);
         setOtherUserName(profile.user.displayName);
         setOtherUserPhoto(profile.user.photoURL);
       } catch (err) {
@@ -131,44 +133,58 @@ export const ChatScreen: React.FC<ChatScreenProps> = ({ route, navigation }) => 
     navigation.goBack();
   };
 
+  const handleUserProfilePress = () => {
+    if (otherUserId) {
+      navigation.navigate('UserProfile', { userId: otherUserId });
+    }
+  };
+
   // Loading State
   if (isLoading && messages.length === 0) {
     return (
-      <SafeAreaView style={styles.container}>
+      <View style={styles.container}>
         <View style={styles.header}>
           <TouchableOpacity onPress={handleBack} style={styles.backButton}>
             <Icon name="arrow-back" size={24} color="#C7A24C" />
           </TouchableOpacity>
-          <View style={styles.headerCenter}>
+          <TouchableOpacity 
+            style={styles.headerCenter}
+            onPress={handleUserProfilePress}
+            activeOpacity={0.7}
+          >
             {otherUserPhoto && (
               <Image source={{ uri: otherUserPhoto }} style={styles.headerUserPhoto} />
             )}
             <Text style={styles.headerTitle}>{otherUserName}</Text>
-          </View>
+          </TouchableOpacity>
           <View style={styles.backButton} />
         </View>
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color="#C7A24C" />
           <Text style={styles.loadingText}>Cargando mensajes...</Text>
         </View>
-      </SafeAreaView>
+      </View>
     );
   }
 
   // Error State
   if (error) {
     return (
-      <SafeAreaView style={styles.container}>
+      <View style={styles.container}>
         <View style={styles.header}>
           <TouchableOpacity onPress={handleBack} style={styles.backButton}>
             <Icon name="arrow-back" size={24} color="#C7A24C" />
           </TouchableOpacity>
-          <View style={styles.headerCenter}>
+          <TouchableOpacity 
+            style={styles.headerCenter}
+            onPress={handleUserProfilePress}
+            activeOpacity={0.7}
+          >
             {otherUserPhoto && (
               <Image source={{ uri: otherUserPhoto }} style={styles.headerUserPhoto} />
             )}
             <Text style={styles.headerTitle}>{otherUserName}</Text>
-          </View>
+          </TouchableOpacity>
           <View style={styles.backButton} />
         </View>
         <View style={styles.errorContainer}>
@@ -180,12 +196,12 @@ export const ChatScreen: React.FC<ChatScreenProps> = ({ route, navigation }) => 
             <Text style={styles.backButtonText}>Volver</Text>
           </TouchableOpacity>
         </View>
-      </SafeAreaView>
+      </View>
     );
   }
 
   return (
-    <SafeAreaView style={styles.container}>
+    <View style={styles.container}>
       <KeyboardAvoidingView
         style={styles.container}
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
@@ -196,12 +212,16 @@ export const ChatScreen: React.FC<ChatScreenProps> = ({ route, navigation }) => 
           <TouchableOpacity onPress={handleBack} style={styles.backButton}>
             <Icon name="arrow-back" size={24} color="#C7A24C" />
           </TouchableOpacity>
-          <View style={styles.headerCenter}>
+          <TouchableOpacity 
+            style={styles.headerCenter}
+            onPress={handleUserProfilePress}
+            activeOpacity={0.7}
+          >
             {otherUserPhoto && (
               <Image source={{ uri: otherUserPhoto }} style={styles.headerUserPhoto} />
             )}
             <Text style={styles.headerTitle}>{otherUserName}</Text>
-          </View>
+          </TouchableOpacity>
           <View style={styles.backButton} />
         </View>
 
@@ -273,7 +293,7 @@ export const ChatScreen: React.FC<ChatScreenProps> = ({ route, navigation }) => 
           onRemoveReaction={handleRemoveReaction}
         />
       </KeyboardAvoidingView>
-    </SafeAreaView>
+    </View>
   );
 };
 

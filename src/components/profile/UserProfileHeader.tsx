@@ -7,30 +7,41 @@ import {
   Dimensions,
   ImageBackground,
   TouchableOpacity,
+  ActivityIndicator,
 } from 'react-native';
+import Icon from 'react-native-vector-icons/Ionicons';
 import type { FavoriteItem } from '../../types/user.types';
-import type { UserMediaStats } from '../../types/mediaLog.types';
 import { COLORS } from '../../config/colors';
-import LinearGradient from 'react-native-linear-gradient';
 
 const { width } = Dimensions.get('window');
-const BACKDROP_HEIGHT = 200;
+const BACKDROP_HEIGHT = 180;
 const AVATAR_SIZE = 100;
 const AVATAR_OVERLAP = AVATAR_SIZE / 2;
 
-interface ProfileHeaderProps {
+interface UserStats {
+  totalMovies: number;
+  totalShows: number;
+  totalLogs: number;
+  averageRating: number;
+}
+
+interface UserProfileHeaderProps {
   displayName: string;
   photoURL?: string;
   bio?: string;
   followersCount: number;
   followingCount: number;
-  stats: UserMediaStats | null;
+  stats: UserStats | null;
   favorites: FavoriteItem[];
-  onFollowersPress?: () => void;
-  onFollowingPress?: () => void;
+  isFollowing: boolean;
+  isTogglingFollow: boolean;
+  onToggleFollow: () => void;
+  onFollowersPress: () => void;
+  onFollowingPress: () => void;
+  isOwnProfile?: boolean; // Nueva prop para ocultar el botón de follow
 }
 
-export default function ProfileHeader({
+export default function UserProfileHeader({
   displayName,
   photoURL,
   bio,
@@ -38,9 +49,13 @@ export default function ProfileHeader({
   followingCount,
   stats,
   favorites,
+  isFollowing,
+  isTogglingFollow,
+  onToggleFollow,
   onFollowersPress,
   onFollowingPress,
-}: ProfileHeaderProps) {
+  isOwnProfile = false,
+}: UserProfileHeaderProps) {
   const [currentPosterIndex, setCurrentPosterIndex] = useState(0);
 
   const posterUrls = favorites
@@ -53,7 +68,7 @@ export default function ProfileHeader({
 
     const interval = setInterval(() => {
       setCurrentPosterIndex(prev => (prev + 1) % posterUrls.length);
-    }, 5000);
+    }, 10000);
 
     return () => clearInterval(interval);
   }, [posterUrls.length]);
@@ -68,33 +83,13 @@ export default function ProfileHeader({
         <ImageBackground
           source={{ uri: currentPoster }}
           style={styles.backdrop}
-          blurRadius={3}
+          blurRadius={8}
         >
-          <LinearGradient
-            colors={[
-              'rgba(0,0,0,0.9)',
-              'rgba(0,0,0,0.6)',
-              'rgba(0,0,0,0.35)',
-              'rgba(0,0,0,0)',
-            ]}
-            start={{ x: 0.5, y: 1 }}
-            end={{ x: 0.5, y: 0 }}
-            style={styles.backdropGradient}
-          />
+          <View style={styles.backdropOverlay} />
         </ImageBackground>
       ) : (
         <View style={styles.backdropPlaceholder}>
-          <LinearGradient
-            colors={[
-              'rgba(0,0,0,0.9)',
-              'rgba(0,0,0,0.6)',
-              'rgba(0,0,0,0.35)',
-              'rgba(0,0,0,0)',
-            ]}
-            start={{ x: 0.5, y: 1 }}
-            end={{ x: 0.5, y: 0 }}
-            style={styles.backdropGradient}
-          />
+          <View style={styles.backdropOverlay} />
         </View>
       )}
 
@@ -117,50 +112,71 @@ export default function ProfileHeader({
         {bio ? <Text style={styles.bio}>{bio}</Text> : null}
 
         <View style={styles.followRow}>
-          <TouchableOpacity
+          <TouchableOpacity 
             style={styles.followItem}
             onPress={onFollowersPress}
             activeOpacity={0.7}
-            disabled={!onFollowersPress}
           >
             <Text style={styles.followCount}>{followersCount}</Text>
             <Text style={styles.followLabel}>Followers</Text>
           </TouchableOpacity>
-
-          <TouchableOpacity
+          
+          <TouchableOpacity 
             style={styles.followItem}
             onPress={onFollowingPress}
             activeOpacity={0.7}
-            disabled={!onFollowingPress}
           >
             <Text style={styles.followCount}>{followingCount}</Text>
             <Text style={styles.followLabel}>Following</Text>
           </TouchableOpacity>
         </View>
-      </View>
 
-      {/* Stats */}
-      <View style={styles.statsRow}>
-        <View style={styles.statItem}>
-          <Text style={styles.statNumber}>
-            {stats ? stats.totalMoviesWatched + stats.totalTvShowsWatched : 0}
-          </Text>
-          <Text style={styles.statLabel}>Total Films</Text>
-        </View>
-        <View style={styles.statItem}>
-          <Text style={styles.statNumber}>{stats ? stats.totalViews : 0}</Text>
-          <Text style={styles.statLabel}>Film This Year</Text>
-        </View>
-        <View style={styles.statItem}>
-          <Text style={styles.statNumber}>{favorites.length}</Text>
-          <Text style={styles.statLabel}>Lists</Text>
-        </View>
-        <View style={styles.statItem}>
-          <Text style={styles.statNumber}>
-            {stats ? stats.totalReviews : 0}
-          </Text>
-          <Text style={styles.statLabel}>Review</Text>
-        </View>
+        {/* Botón Follow/Unfollow - solo si NO es nuestro propio perfil */}
+        {!isOwnProfile && (
+          <TouchableOpacity
+            style={[
+              styles.followButton,
+              isFollowing && styles.followingButton,
+            ]}
+            onPress={onToggleFollow}
+            disabled={isTogglingFollow}
+            activeOpacity={0.7}
+          >
+            {isTogglingFollow ? (
+              <ActivityIndicator size="small" color={isFollowing ? COLORS.text : COLORS.background} />
+            ) : (
+              <>
+                <Icon 
+                  name={isFollowing ? 'person-remove-outline' : 'person-add-outline'} 
+                  size={20} 
+                  color={isFollowing ? COLORS.text : COLORS.background}
+                />
+                <Text style={[
+                  styles.followButtonText,
+                  isFollowing && styles.followingButtonText,
+                ]}>
+                  {isFollowing ? 'Unfollow' : 'Follow'}
+                </Text>
+              </>
+            )}
+          </TouchableOpacity>
+        )}
+
+        {/* Estadísticas */}
+        {stats && (
+          <View style={styles.statsRow}>
+            <View style={styles.statItem}>
+              <Text style={styles.statValue}>{stats.totalLogs}</Text>
+              <Text style={styles.statLabel}>Films</Text>
+            </View>
+            <View style={styles.statItem}>
+              <Text style={styles.statValue}>
+                {stats.averageRating > 0 ? stats.averageRating.toFixed(1) : '—'}
+              </Text>
+              <Text style={styles.statLabel}>Avg Rating</Text>
+            </View>
+          </View>
+        )}
       </View>
     </View>
   );
@@ -168,30 +184,25 @@ export default function ProfileHeader({
 
 const styles = StyleSheet.create({
   container: {
-    width: width,
-    marginBottom: 20,
-    backgroundColor: COLORS.background,
+    marginBottom: 16,
   },
   backdrop: {
-    width: '100%',
+    width: width,
     height: BACKDROP_HEIGHT,
   },
   backdropPlaceholder: {
-    width: '100%',
+    width: width,
     height: BACKDROP_HEIGHT,
     backgroundColor: COLORS.surface,
   },
-  backdropGradient: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    height: '60%', // ajusta si quieres más o menos degradado
+  backdropOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(17, 24, 28, 0.7)',
   },
   avatarContainer: {
     alignItems: 'center',
     marginTop: -AVATAR_OVERLAP,
-    zIndex: 10,
+    marginBottom: 12,
   },
   avatar: {
     width: AVATAR_SIZE,
@@ -204,27 +215,26 @@ const styles = StyleSheet.create({
     width: AVATAR_SIZE,
     height: AVATAR_SIZE,
     borderRadius: AVATAR_SIZE / 2,
-    backgroundColor: COLORS.surface,
-    borderWidth: 4,
-    borderColor: COLORS.primary,
+    backgroundColor: COLORS.primary,
     justifyContent: 'center',
     alignItems: 'center',
+    borderWidth: 4,
+    borderColor: COLORS.background,
   },
   avatarText: {
     fontSize: 36,
     fontWeight: 'bold',
-    color: COLORS.primary,
+    color: COLORS.background,
   },
   profileInfo: {
-    alignItems: 'center',
     paddingHorizontal: 20,
-    marginTop: 12,
   },
   displayName: {
     fontSize: 24,
-    fontWeight: 'bold',
+    fontWeight: '700',
     color: COLORS.text,
-    marginBottom: 6,
+    textAlign: 'center',
+    marginBottom: 8,
   },
   bio: {
     fontSize: 14,
@@ -232,49 +242,74 @@ const styles = StyleSheet.create({
     opacity: 0.7,
     textAlign: 'center',
     marginBottom: 16,
-    paddingHorizontal: 20,
+    lineHeight: 20,
   },
   followRow: {
     flexDirection: 'row',
-    gap: 40,
-    marginTop: 8,
+    justifyContent: 'center',
+    gap: 32,
+    marginBottom: 16,
   },
   followItem: {
     alignItems: 'center',
   },
   followCount: {
     fontSize: 20,
-    fontWeight: 'bold',
+    fontWeight: '700',
     color: COLORS.text,
   },
   followLabel: {
-    fontSize: 13,
+    fontSize: 12,
     color: COLORS.text,
     opacity: 0.6,
-    marginTop: 2,
+    marginTop: 4,
+  },
+  followButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    backgroundColor: COLORS.primary,
+    paddingVertical: 12,
+    paddingHorizontal: 32,
+    borderRadius: 8,
+    marginBottom: 16,
+    alignSelf: 'center',
+    minWidth: 140,
+  },
+  followingButton: {
+    backgroundColor: COLORS.transparent,
+    borderWidth: 1,
+    borderColor: COLORS.primary,
+  },
+  followButtonText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: COLORS.background,
+  },
+  followingButtonText: {
+    color: COLORS.text,
   },
   statsRow: {
     flexDirection: 'row',
-    justifyContent: 'space-around',
-    paddingVertical: 20,
-    paddingHorizontal: 10,
-    marginTop: 20,
-    marginHorizontal: 20,
+    justifyContent: 'center',
+    gap: 48,
+    paddingTop: 16,
     borderTopWidth: 1,
-    borderTopColor: 'rgba(199, 162, 76, 0.2)',
+    borderTopColor: 'rgba(242, 233, 228, 0.1)',
   },
   statItem: {
     alignItems: 'center',
   },
-  statNumber: {
+  statValue: {
     fontSize: 20,
-    fontWeight: 'bold',
+    fontWeight: '700',
     color: COLORS.primary,
-    marginBottom: 4,
   },
   statLabel: {
-    fontSize: 11,
+    fontSize: 12,
     color: COLORS.text,
     opacity: 0.6,
+    marginTop: 4,
   },
 });

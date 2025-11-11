@@ -10,7 +10,10 @@ import { ChatScreen } from '../screens/chats/ChatScreen';
 import { MatchesScreen } from '../screens/matches/MatchesScreen';
 import SettingsScreen from '../screens/settings/SettingsScreen';
 import PlansScreen from '../screens/settings/PlansScreen';
+import FollowListScreen from '../screens/profile/FollowListScreen';
+import UserProfileScreen from '../screens/profile/UserProfileScreen';
 import type { TmdbMovieDetails } from '../types/tmdb.types';
+import type { FollowListType } from '../hooks/profile/useFollowList';
 import { COLORS } from '../config/colors';
 
 /**
@@ -26,6 +29,8 @@ import { COLORS } from '../config/colors';
  *   - Matches: Pantalla de matches con otros usuarios
  *   - Settings: Configuración de la aplicación
  *   - Plans: Planes de suscripción
+ *   - FollowList: Lista de seguidores/seguidos
+ *   - UserProfile: Perfil de otro usuario
  */
 export type RootStackParamList = {
   Auth: undefined;
@@ -36,6 +41,8 @@ export type RootStackParamList = {
   Matches: undefined;
   Settings: undefined;
   Plans: undefined;
+  FollowList: { type: FollowListType; userId: string };
+  UserProfile: { userId: string };
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -104,6 +111,22 @@ export default function RootNavigator() {
           <Stack.Screen
             name="Plans"
             component={PlansScreen}
+            options={{
+              presentation: 'card',
+              animation: 'slide_from_right',
+            }}
+          />
+          <Stack.Screen
+            name="FollowList"
+            component={FollowListScreen}
+            options={{
+              presentation: 'card',
+              animation: 'slide_from_right',
+            }}
+          />
+          <Stack.Screen
+            name="UserProfile"
+            component={UserProfileScreen}
             options={{
               presentation: 'card',
               animation: 'slide_from_right',

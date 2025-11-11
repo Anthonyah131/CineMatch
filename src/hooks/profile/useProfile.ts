@@ -42,7 +42,8 @@ export function useProfile(): UseProfileResult {
         mediaLogsService.getMyStats(),
       ]);
 
-      setUser(userData);
+      const userWithId = { ...userData, id: authUser.id };
+      setUser(userWithId);
       setFavorites(favoritesData);
       setRecentLogs(logsData);
       setStats(statsData);

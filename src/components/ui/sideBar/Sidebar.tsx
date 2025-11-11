@@ -24,7 +24,7 @@ export default function Sidebar({
   onClose,
   currentScreen = 'Home',
 }: SidebarProps) {
-  const { user, logout, isAuthenticating } = useAuth();
+  const { user, fullUserData, logout, isAuthenticating } = useAuth();
 
   const handleLogout = async () => {
     try {
@@ -32,6 +32,26 @@ export default function Sidebar({
       await logout();
     } catch (error) {
       console.error('Error al cerrar sesión:', error);
+    }
+  };
+
+  const handleFollowersPress = () => {
+    if (onClose) onClose();
+    if (user?.id) {
+      navigation.navigate('HomeTab', { 
+        screen: 'FollowList', 
+        params: { type: 'followers', userId: user.id } 
+      });
+    }
+  };
+
+  const handleFollowingPress = () => {
+    if (onClose) onClose();
+    if (user?.id) {
+      navigation.navigate('HomeTab', { 
+        screen: 'FollowList', 
+        params: { type: 'following', userId: user.id } 
+      });
     }
   };
 
@@ -49,12 +69,14 @@ export default function Sidebar({
         <View style={styles.profileRow}>
           <Image
             source={{
-              uri: user?.photoUrl || 'https://i.pravatar.cc/150?img=12',
+              uri: fullUserData?.photoURL || user?.photoUrl || 'https://i.pravatar.cc/150?img=12',
             }}
             style={styles.avatar}
           />
           <View style={styles.profileInfo}>
-            <Text style={styles.username}>{user?.name || 'Usuario'}</Text>
+            <Text style={styles.username}>
+              {fullUserData?.displayName || user?.name || 'Usuario'}
+            </Text>
             <Text style={styles.handle}>
               @{user?.email?.split('@')[0] || 'user'}
             </Text>
@@ -62,11 +84,21 @@ export default function Sidebar({
         </View>
 
         <View style={styles.followRow}>
-          <TouchableOpacity style={styles.followButton}>
-            <Text style={styles.followButtonText}>500 Followers</Text>
+          <TouchableOpacity 
+            style={styles.followButton}
+            onPress={handleFollowersPress}
+          >
+            <Text style={styles.followButtonText}>
+              {fullUserData?.followersCount || 0} Followers
+            </Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.followButton}>
-            <Text style={styles.followButtonText}>420 Following</Text>
+          <TouchableOpacity 
+            style={styles.followButton}
+            onPress={handleFollowingPress}
+          >
+            <Text style={styles.followButtonText}>
+              {fullUserData?.followingCount || 0} Following
+            </Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -196,7 +228,7 @@ const styles = StyleSheet.create({
   },
   followRow: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    justifyContent: 'space-around',
     paddingTop: 20,
   },
   followButton: {
