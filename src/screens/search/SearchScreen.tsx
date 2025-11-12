@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   View,
   StyleSheet,
@@ -8,35 +8,98 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useMovieSearch } from '../../hooks/search/useMovieSearch';
-import { SearchInput, SearchResults } from '../../components/screens/search';
+import { useUserSearch } from '../../hooks/search/useUserSearch';
+import { 
+  SearchInput, 
+  SearchResults, 
+  UserSearchResults,
+  SearchTabs,
+  type SearchTabType 
+} from '../../components/screens/search';
 import { COLORS } from '../../config/colors';
 import type { TmdbMovie } from '../../types/tmdb.types';
+import type { User } from '../../types/user.types';
 
 interface SearchScreenProps {
   navigation: any;
 }
 
 export const SearchScreen: React.FC<SearchScreenProps> = ({ navigation }) => {
+  const [activeTab, setActiveTab] = useState<SearchTabType>('movies');
+
+  // Movie search hook
   const {
-    query,
+    query: movieQuery,
     movies,
-    loading,
-    error,
-    hasSearched,
+    loading: moviesLoading,
+    error: moviesError,
+    hasSearched: hasMoviesSearched,
     hasMorePages,
     searchMovies,
     loadMoreMovies,
-    clearSearch,
-    setQuery,
+    clearSearch: clearMovieSearch,
+    setQuery: setMovieQuery,
   } = useMovieSearch();
+
+  // User search hook
+  const {
+    query: userQuery,
+    users,
+    loading: usersLoading,
+    error: usersError,
+    hasSearched: hasUsersSearched,
+    searchUsers,
+    clearSearch: clearUserSearch,
+    setQuery: setUserQuery,
+  } = useUserSearch();
+
+  // Unified query state
+  const currentQuery = activeTab === 'movies' ? movieQuery : userQuery;
+  const currentLoading = activeTab === 'movies' ? moviesLoading : usersLoading;
+
+  const handleQueryChange = (text: string) => {
+    if (activeTab === 'movies') {
+      setMovieQuery(text);
+    } else {
+      setUserQuery(text);
+    }
+  };
+
+  const handleClearSearch = () => {
+    if (activeTab === 'movies') {
+      clearMovieSearch();
+    } else {
+      clearUserSearch();
+    }
+  };
+
+  const handleTabChange = (tab: SearchTabType) => {
+    setActiveTab(tab);
+    // When switching tabs, if the other tab has a different query, sync them
+    if (tab === 'movies' && userQuery && !movieQuery) {
+      setMovieQuery(userQuery);
+    } else if (tab === 'users' && movieQuery && !userQuery) {
+      setUserQuery(movieQuery);
+    }
+  };
 
   const handleMoviePress = (movie: TmdbMovie) => {
     navigation.navigate('MovieDetails', { movieId: movie.id });
   };
 
-  const handleRetry = () => {
-    if (query.trim()) {
-      searchMovies(query);
+  const handleUserPress = (user: User) => {
+    navigation.navigate('UserProfile', { userId: user.id });
+  };
+
+  const handleMovieRetry = () => {
+    if (movieQuery.trim()) {
+      searchMovies(movieQuery);
+    }
+  };
+
+  const handleUserRetry = () => {
+    if (userQuery.trim()) {
+      searchUsers(userQuery);
     }
   };
 
@@ -54,25 +117,47 @@ export const SearchScreen: React.FC<SearchScreenProps> = ({ navigation }) => {
       >
         <View style={styles.header}>
           <SearchInput
-            value={query}
-            onChangeText={setQuery}
-            onClear={clearSearch}
-            loading={loading}
-            placeholder="Buscar películas..."
+            value={currentQuery}
+            onChangeText={handleQueryChange}
+            onClear={handleClearSearch}
+            loading={currentLoading}
+            placeholder={
+              activeTab === 'movies' 
+                ? 'Buscar películas...' 
+                : 'Buscar usuarios...'
+            }
+          />
+          
+          <SearchTabs
+            activeTab={activeTab}
+            onTabChange={handleTabChange}
+            movieCount={hasMoviesSearched ? movies.length : undefined}
+            userCount={hasUsersSearched ? users.length : undefined}
           />
         </View>
 
         <View style={styles.content}>
-          <SearchResults
-            movies={movies}
-            loading={loading}
-            error={error}
-            hasSearched={hasSearched}
-            hasMorePages={hasMorePages}
-            onMoviePress={handleMoviePress}
-            onLoadMore={loadMoreMovies}
-            onRetry={handleRetry}
-          />
+          {activeTab === 'movies' ? (
+            <SearchResults
+              movies={movies}
+              loading={moviesLoading}
+              error={moviesError}
+              hasSearched={hasMoviesSearched}
+              hasMorePages={hasMorePages}
+              onMoviePress={handleMoviePress}
+              onLoadMore={loadMoreMovies}
+              onRetry={handleMovieRetry}
+            />
+          ) : (
+            <UserSearchResults
+              users={users}
+              loading={usersLoading}
+              error={usersError}
+              hasSearched={hasUsersSearched}
+              onUserPress={handleUserPress}
+              onRetry={handleUserRetry}
+            />
+          )}
         </View>
       </KeyboardAvoidingView>
     </SafeAreaView>
