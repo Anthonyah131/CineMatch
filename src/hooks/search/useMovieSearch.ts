@@ -95,7 +95,7 @@ export const useMovieSearch = (): UseMovieSearchReturn => {
       } else if (query.trim().length === 0) {
         clearSearch();
       }
-    }, 500);
+    }, 1500);
 
     return () => clearTimeout(timeoutId);
   }, [query, searchMovies, clearSearch]);
