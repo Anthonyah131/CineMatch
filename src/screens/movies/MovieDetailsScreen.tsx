@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
   View,
   ScrollView,
@@ -11,7 +11,9 @@ import {
 } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import { useMovieDetails } from '../../hooks/movies/useMovieDetails';
+import { mediaCacheService } from '../../services/mediaCacheService';
 import Icon from 'react-native-vector-icons/Ionicons';
+import type { MediaDetailsWithReviews } from '../../types/user.types';
 import {
   MovieHeader,
   MovieInfo,
@@ -23,6 +25,7 @@ import {
   MovieDetailsTab,
   type MovieTab,
 } from '../../components/screens/movie-details';
+import ReviewsList from '../../components/movies/ReviewsList';
 import { buildPosterUrl } from '../../utils/tmdbImageHelpers';
 import { COLORS } from '../../config/colors';
 ('use client');
@@ -42,6 +45,8 @@ export default function MovieDetailsScreen({
 }: MovieDetailsScreenProps) {
   const { movieId } = route.params;
   const [activeTab, setActiveTab] = useState<MovieTab>('cast');
+  const [reviewsData, setReviewsData] = useState<MediaDetailsWithReviews | null>(null);
+  const [loadingReviews, setLoadingReviews] = useState(false);
 
   const {
     movieDetails,
@@ -71,6 +76,32 @@ export default function MovieDetailsScreen({
   const handleWriteReview = () => {
     navigation.navigate('WriteReview', { movieDetails });
   };
+
+  const handleUserPress = (userId: string) => {
+    navigation.navigate('UserProfile', { userId });
+  };
+
+  const loadReviews = useCallback(async () => {
+    setLoadingReviews(true);
+    try {
+      const data = await mediaCacheService.getMediaDetailsWithReviews(movieId, 'movie');
+      setReviewsData(data);
+    } catch (err) {
+      console.error('Error loading movie reviews:', err);
+      // Reviews are optional, don't show error
+    } finally {
+      setLoadingReviews(false);
+    }
+  }, [movieId]);
+
+  const refreshReviews = useCallback(async () => {
+    await loadReviews();
+  }, [loadReviews]);
+
+  useEffect(() => {
+    loadReviews();
+  }, [loadReviews]);
+
   // Director
   const director = credits?.crew.find(member => member.job === 'Director');
 
@@ -119,7 +150,10 @@ export default function MovieDetailsScreen({
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
-            onRefresh={refresh}
+            onRefresh={() => {
+              refresh();
+              refreshReviews();
+            }}
             tintColor={COLORS.primary}
             colors={[COLORS.primary]}
           />
@@ -220,6 +254,16 @@ export default function MovieDetailsScreen({
 
         {activeTab === 'details' && (
           <MovieDetailsTab movieDetails={movieDetails} />
+        )}
+
+        {/* Reviews Section */}
+        {reviewsData && reviewsData.reviews && reviewsData.reviews.length > 0 && (
+          <ReviewsList
+            reviews={reviewsData.reviews}
+            loading={loadingReviews}
+            posterPath={movieDetails.poster_path ?? undefined}
+            onUserPress={handleUserPress}
+          />
         )}
 
         {/* Bottom padding */}

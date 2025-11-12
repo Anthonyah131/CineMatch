@@ -33,7 +33,7 @@ export const responseLogger = (response: AxiosResponse): AxiosResponse => {
     const url = response.config.url || '';
     const status = response.status;
 
-    console.log(`📥 ${status} ${method} ${url}`, response.data);
+    console.log(`🟢 ${status} ${method} ${url}`, response.data);
   }
 
   return response;

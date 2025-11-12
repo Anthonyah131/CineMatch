@@ -38,9 +38,9 @@ export default function Sidebar({
   const handleFollowersPress = () => {
     if (onClose) onClose();
     if (user?.id) {
-      navigation.navigate('HomeTab', { 
-        screen: 'FollowList', 
-        params: { type: 'followers', userId: user.id } 
+      navigation.navigate('HomeTab', {
+        screen: 'FollowList',
+        params: { type: 'followers', userId: user.id },
       });
     }
   };
@@ -48,9 +48,9 @@ export default function Sidebar({
   const handleFollowingPress = () => {
     if (onClose) onClose();
     if (user?.id) {
-      navigation.navigate('HomeTab', { 
-        screen: 'FollowList', 
-        params: { type: 'following', userId: user.id } 
+      navigation.navigate('HomeTab', {
+        screen: 'FollowList',
+        params: { type: 'following', userId: user.id },
       });
     }
   };
@@ -69,7 +69,10 @@ export default function Sidebar({
         <View style={styles.profileRow}>
           <Image
             source={{
-              uri: fullUserData?.photoURL || user?.photoUrl || 'https://i.pravatar.cc/150?img=12',
+              uri:
+                fullUserData?.photoURL ||
+                user?.photoUrl ||
+                'https://i.pravatar.cc/150?img=12',
             }}
             style={styles.avatar}
           />
@@ -84,7 +87,7 @@ export default function Sidebar({
         </View>
 
         <View style={styles.followRow}>
-          <TouchableOpacity 
+          <TouchableOpacity
             style={styles.followButton}
             onPress={handleFollowersPress}
           >
@@ -92,7 +95,7 @@ export default function Sidebar({
               {fullUserData?.followersCount || 0} Followers
             </Text>
           </TouchableOpacity>
-          <TouchableOpacity 
+          <TouchableOpacity
             style={styles.followButton}
             onPress={handleFollowingPress}
           >
@@ -104,7 +107,10 @@ export default function Sidebar({
       </View>
 
       {/* Options */}
-      <ScrollView style={styles.menuSection} showsVerticalScrollIndicator={false}>
+      <ScrollView
+        style={styles.menuSection}
+        showsVerticalScrollIndicator={false}
+      >
         <SidebarButton
           title="Home"
           icon="home-outline"
@@ -118,26 +124,9 @@ export default function Sidebar({
           icon="book-outline"
           onPress={() => {
             if (onClose) onClose();
-            // Navegar dentro del Home Stack
             navigation.navigate('HomeTab', { screen: 'Diary' });
           }}
           active={currentScreen === 'Diary'}
-        />
-        <SidebarButton
-          title="Reviews"
-          icon="chatbubble-outline"
-          onPress={() => {
-            if (onClose) onClose();
-          }}
-          active={currentScreen === 'Reviews'}
-        />
-        <SidebarButton
-          title="Watchlist"
-          icon="bookmark-outline"
-          onPress={() => {
-            if (onClose) onClose();
-          }}
-          active={currentScreen === 'Watchlist'}
         />
         <SidebarButton
           title="Lists"
@@ -146,14 +135,6 @@ export default function Sidebar({
             if (onClose) onClose();
           }}
           active={currentScreen === 'Lists'}
-        />
-        <SidebarButton
-          title="Likes"
-          icon="heart-outline"
-          onPress={() => {
-            if (onClose) onClose();
-          }}
-          active={currentScreen === 'Likes'}
         />
       </ScrollView>
 

@@ -201,3 +201,67 @@ export interface FollowingWithInfo {
 export interface IsFollowingResponse {
   isFollowing: boolean;
 }
+
+/**
+ * Timestamp de Firestore
+ */
+export interface FirestoreTimestamp {
+  _seconds: number;
+  _nanoseconds: number;
+}
+
+/**
+ * Actividad de un amigo (log de película vista)
+ */
+export interface FriendActivity {
+  id: string;
+  userId: string;
+  userName: string;
+  userPhoto: string;
+  tmdbId: number;
+  mediaType: MediaType;
+  title: string;
+  posterPath: string;
+  rating?: number;
+  review?: string;
+  reviewLang?: string;
+  watchedAt: FirestoreTimestamp;
+  createdAt: FirestoreTimestamp;
+}
+
+/**
+ * Review de usuario para una película
+ */
+export interface UserReview {
+  id: string;
+  userId: string;
+  userName: string;
+  userPhoto: string;
+  rating?: number;
+  review?: string;
+  reviewLang?: string;
+  watchedAt: FirestoreTimestamp;
+  createdAt: FirestoreTimestamp;
+}
+
+/**
+ * Datos de cache de media con reviews
+ */
+export interface MediaCacheData {
+  tmdbId: number;
+  mediaType: MediaType;
+  title: string;
+  posterPath: string;
+  releaseYear: number;
+  genres: number[];
+  voteAverage: number;
+}
+
+/**
+ * Respuesta completa de media con reviews
+ */
+export interface MediaDetailsWithReviews {
+  isCached: boolean;
+  cacheData: MediaCacheData;
+  reviews: UserReview[];
+}

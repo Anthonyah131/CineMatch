@@ -23,6 +23,8 @@ export interface PotentialMatch {
   theirWatchedAt: string | FirestoreTimestamp; // Cuándo la vio el otro usuario
   myWatchedAt: string | FirestoreTimestamp; // Cuándo la viste tú
   daysAgo: number; // Hace cuántos días (para ordenar)
+  myRating?: number; // Mi rating de 1-5 estrellas
+  theirRating?: number; // Su rating de 1-5 estrellas
 }
 
 /**

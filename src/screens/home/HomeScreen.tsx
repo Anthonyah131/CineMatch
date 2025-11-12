@@ -12,6 +12,8 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import Icon from 'react-native-vector-icons/Ionicons';
 import Sidebar from '../../components/ui/sideBar/Sidebar';
 import MovieCarousel from '../../components/ui/carousel/MovieCarousel';
+import EnhancedMatchesCard from '../../components/home/EnhancedMatchesCard';
+import FriendsActivityCarousel from '../../components/home/FriendsActivityCarousel';
 import { useHomeMovies } from '../../hooks/home/useHomeMovies';
 import { useAuth } from '../../context/AuthContext';
 import type { TmdbMovie } from '../../types/tmdb.types';
@@ -24,6 +26,10 @@ export default function HomeScreen({ navigation }: any) {
   const {
     trendingMovies,
     topRatedMovies,
+    friendsActivity,
+    matches,
+    loadingActivity,
+    loadingMatches,
     error,
     refreshing,
     refresh,
@@ -34,6 +40,22 @@ export default function HomeScreen({ navigation }: any) {
 
   const handleMoviePress = (movie: TmdbMovie) => {
     navigation.navigate('MovieDetails', { movieId: movie.id });
+  };
+
+  const handleMoviePressById = (tmdbId: number) => {
+    navigation.navigate('MovieDetails', { movieId: tmdbId });
+  };
+
+  const handleUserPress = (userId: string) => {
+    navigation.navigate('UserProfile', { userId });
+  };
+
+  const handleMatchesPress = () => {
+    navigation.navigate('Matches');
+  };
+
+  const handleRefresh = async () => {
+    await refresh();
   };
 
   return (
@@ -61,8 +83,8 @@ export default function HomeScreen({ navigation }: any) {
         showsVerticalScrollIndicator={false}
         refreshControl={
           <RefreshControl
-            refreshing={refreshing}
-            onRefresh={refresh}
+            refreshing={refreshing || loadingActivity || loadingMatches}
+            onRefresh={handleRefresh}
             tintColor="#C7A24C"
             colors={['#C7A24C']}
           />
@@ -74,13 +96,26 @@ export default function HomeScreen({ navigation }: any) {
             <Icon name="alert-circle-outline" size={48} color={COLORS.accent} />
             <Text style={styles.errorBannerText}>{error}</Text>
             <Text style={styles.errorBannerSubtext}>
-              No se pudieron cargar algunas películas
+              No se pudieron cargar algunos datos
             </Text>
-            <TouchableOpacity style={styles.retryButton} onPress={refresh}>
+            <TouchableOpacity
+              style={styles.retryButton}
+              onPress={handleRefresh}
+            >
               <Icon name="refresh" size={18} color={COLORS.text} />
               <Text style={styles.retryButtonText}>Reintentar</Text>
             </TouchableOpacity>
           </View>
+        )}
+
+        {/* MATCHES - Punto fuerte de la app */}
+        {matches && (
+          <EnhancedMatchesCard
+            matches={matches}
+            loading={loadingMatches}
+            onMatchPress={handleUserPress}
+            onViewAllPress={handleMatchesPress}
+          />
         )}
 
         {/* Trending Movies */}
@@ -101,33 +136,21 @@ export default function HomeScreen({ navigation }: any) {
           />
         )}
 
-        {/* Matches Call to Action */}
-        <TouchableOpacity
-          style={styles.matchesCard}
-          onPress={() => navigation.navigate('Matches')}
-          activeOpacity={0.8}
-        >
-          <View style={styles.matchesIconContainer}>
-            <Icon name="people" size={48} color="#C7A24C" />
-          </View>
-          <View style={styles.matchesContent}>
-            <Text style={styles.matchesTitle}>
-              Encuentra Cinéfilos como Tú
-            </Text>
-            <Text style={styles.matchesSubtitle}>
-              Conecta con personas que comparten tus mismos gustos cinematográficos
-            </Text>
-            <View style={styles.matchesButton}>
-              <Text style={styles.matchesButtonText}>Explorar Matches</Text>
-              <Icon name="arrow-forward" size={18} color="#FFFFFF" />
-            </View>
-          </View>
-        </TouchableOpacity>
+        {/* FRIENDS ACTIVITY - Actividad de amigos */}
+        {friendsActivity.length > 0 && (
+          <FriendsActivityCarousel
+            activities={friendsActivity}
+            loading={loadingActivity}
+            onMoviePress={handleMoviePressById}
+            onUserPress={handleUserPress}
+          />
+        )}
 
         {/* Empty State */}
         {!error &&
           trendingMovies.length === 0 &&
-          topRatedMovies.length === 0 && (
+          topRatedMovies.length === 0 &&
+          friendsActivity.length === 0 && (
             <View style={styles.emptyState}>
               <Icon name="film-outline" size={64} color="#C7A24C" />
               <Text style={styles.emptyText}>No hay películas disponibles</Text>
@@ -269,56 +292,6 @@ const styles = StyleSheet.create({
     marginTop: 8,
     textAlign: 'center',
   },
-  matchesCard: {
-    flexDirection: 'row',
-    backgroundColor: COLORS.surface,
-    marginHorizontal: 20,
-    marginVertical: 24,
-    padding: 20,
-    borderRadius: 16,
-    borderWidth: 2,
-    borderColor: COLORS.primary,
-    alignItems: 'center',
-  },
-  matchesIconContainer: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    backgroundColor: 'rgba(199, 162, 76, 0.15)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 16,
-  },
-  matchesContent: {
-    flex: 1,
-  },
-  matchesTitle: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: COLORS.text,
-    marginBottom: 6,
-  },
-  matchesSubtitle: {
-    fontSize: 13,
-    color: COLORS.textSecondary,
-    marginBottom: 12,
-    lineHeight: 18,
-  },
-  matchesButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    alignSelf: 'flex-start',
-    backgroundColor: COLORS.primary,
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 8,
-    gap: 6,
-  },
-  matchesButtonText: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: COLORS.text,
-  },
   bottomPadding: {
     height: 40,
   },
@@ -344,5 +317,25 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.3,
     shadowRadius: 8,
     zIndex: 1001,
+  },
+  placeholderCard: {
+    backgroundColor: COLORS.surface,
+    marginHorizontal: 20,
+    marginVertical: 16,
+    borderRadius: 16,
+    borderWidth: 2,
+    borderColor: COLORS.primary,
+    padding: 20,
+    alignItems: 'center',
+  },
+  placeholderText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: COLORS.text,
+    marginBottom: 8,
+  },
+  placeholderSubtext: {
+    fontSize: 14,
+    color: COLORS.textSecondary,
   },
 });

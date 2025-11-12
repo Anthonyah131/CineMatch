@@ -11,6 +11,7 @@ import type {
   FollowingWithInfo,
   IsFollowingResponse,
   MediaType,
+  FriendActivity,
 } from '../types/user.types';
 
 /**
@@ -36,8 +37,12 @@ class UsersService {
   /**
    * Obtener perfil completo del usuario con toda la información
    */
-  async getCompleteUserProfile(uid: string): Promise<CompleteUserProfileResponse> {
-    return apiClient.get<CompleteUserProfileResponse>(`${this.baseUrl}/${uid}/complete-profile`);
+  async getCompleteUserProfile(
+    uid: string,
+  ): Promise<CompleteUserProfileResponse> {
+    return apiClient.get<CompleteUserProfileResponse>(
+      `${this.baseUrl}/${uid}/complete-profile`,
+    );
   }
 
   /**
@@ -169,6 +174,13 @@ class UsersService {
     return apiClient.get<User[]>(
       `${this.baseUrl}?q=${encodeURIComponent(query)}&limit=${limit}`,
     );
+  }
+
+  /**
+   * Obtener actividad reciente de usuarios que sigues
+   */
+  async getFollowingActivity(limit: number = 10): Promise<FriendActivity[]> {
+    return apiClient.get<FriendActivity[]>(`${this.baseUrl}/me/following-activity?limit=${limit}`);
   }
 
   /**

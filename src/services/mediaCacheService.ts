@@ -6,6 +6,7 @@ import type {
   CacheMessage,
   MediaType,
 } from '../types/mediaCache.types';
+import type { MediaDetailsWithReviews } from '../types/user.types';
 
 /**
  * Service para gestionar el caché local de TMDB
@@ -124,6 +125,18 @@ class MediaCacheService {
   ): Promise<CacheMessage> {
     return apiClient.delete<CacheMessage>(
       `${this.baseUrl}/cache/${tmdbId}/${mediaType}`,
+    );
+  }
+
+  /**
+   * Obtener detalles de una película/serie con reviews de usuarios
+   */
+  async getMediaDetailsWithReviews(
+    tmdbId: number,
+    mediaType: MediaType = 'movie',
+  ): Promise<MediaDetailsWithReviews> {
+    return apiClient.get<MediaDetailsWithReviews>(
+      `${this.baseUrl}/${mediaType}/${tmdbId}/details-with-reviews`,
     );
   }
 
