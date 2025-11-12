@@ -75,33 +75,38 @@ export default function DiaryLogItem({
           {movieTitle}
         </Text>
 
-        {/* Stars */}
-        {log.rating && (
-          <View style={styles.ratingRow}>
-            {renderStars()}
-            <Text style={styles.ratingText}>{log.rating.toFixed(1)}</Text>
-          </View>
-        )}
+        {/* Stars and Icons Row */}
+        <View style={styles.bottomRow}>
+          <View style={styles.leftContent}>
+            {/* Stars */}
+            {log.rating && (
+              <View style={styles.ratingRow}>
+                {renderStars()}
+                <Text style={styles.ratingText}>{log.rating.toFixed(1)}</Text>
+              </View>
+            )}
 
-        {/* Date */}
-        <Text style={styles.date}>{watchDate}</Text>
-      </View>
+            {/* Icons */}
+            <View style={styles.iconsContainer}>
+              {/* Rewatch Icon */}
+              {log.hadSeenBefore && (
+                <View style={styles.iconBadge}>
+                  <Icon name="refresh" size={14} color={COLORS.info} />
+                </View>
+              )}
 
-      {/* Icons */}
-      <View style={styles.iconsContainer}>
-        {/* Rewatch Icon */}
-        {log.hadSeenBefore && (
-          <View style={styles.iconBadge}>
-            <Icon name="refresh" size={16} color={COLORS.info} />
+              {/* Review Icon */}
+              {log.review && (
+                <View style={styles.iconBadge}>
+                  <Icon name="document-text" size={14} color={COLORS.primary} />
+                </View>
+              )}
+            </View>
           </View>
-        )}
 
-        {/* Review Icon */}
-        {log.review && (
-          <View style={styles.iconBadge}>
-            <Icon name="document-text" size={16} color={COLORS.primary} />
-          </View>
-        )}
+          {/* Date - Now on the right, larger */}
+          <Text style={styles.date}>{watchDate}</Text>
+        </View>
       </View>
     </TouchableOpacity>
   );
@@ -121,9 +126,9 @@ const styles = StyleSheet.create({
     marginRight: 12,
   },
   poster: {
-    width: 60,
-    height: 90,
-    borderRadius: 8,
+    width: 40,
+    height: 70,
+    borderRadius: 4,
   },
   posterPlaceholder: {
     backgroundColor: COLORS.background,
@@ -140,10 +145,19 @@ const styles = StyleSheet.create({
     color: COLORS.text,
     marginBottom: 4,
   },
+  bottomRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-end',
+  },
+  leftContent: {
+    flex: 1,
+    marginRight: 12,
+  },
   ratingRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 4,
+    marginBottom: 6,
   },
   starsContainer: {
     flexDirection: 'row',
@@ -155,18 +169,19 @@ const styles = StyleSheet.create({
     color: COLORS.warning,
   },
   date: {
-    fontSize: 13,
-    color: COLORS.textSecondary,
+    fontSize: 16,
+    fontWeight: '600',
+    color: COLORS.text,
   },
   iconsContainer: {
-    justifyContent: 'flex-start',
-    alignItems: 'flex-end',
-    gap: 8,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
   },
   iconBadge: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
+    width: 24,
+    height: 24,
+    borderRadius: 12,
     backgroundColor: `${COLORS.primary}15`,
     justifyContent: 'center',
     alignItems: 'center',

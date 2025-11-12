@@ -36,7 +36,7 @@ export type RootStackParamList = {
   Auth: undefined;
   App: undefined;
   MovieDetails: { movieId: number };
-  WriteReview: { movieDetails: TmdbMovieDetails };
+  WriteReview: { movieDetails: TmdbMovieDetails; editLogId?: string };
   Chat: { chatId: string };
   Matches: undefined;
   Settings: undefined;

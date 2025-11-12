@@ -26,6 +26,12 @@ interface MovieCache {
   };
 }
 
+// Extended movie type to handle log IDs as strings
+interface MovieWithLogId extends Omit<TmdbMovie, 'id'> {
+  id: string; // log ID
+  tmdbId: number; // TMDB ID for navigation
+}
+
 type ProfileScreenProps = NativeStackScreenProps<ProfileStackParamList, 'ProfileMain'>;
 
 export default function ProfileScreen({ navigation }: ProfileScreenProps) {
@@ -69,10 +75,10 @@ export default function ProfileScreen({ navigation }: ProfileScreenProps) {
 
   const recentlyWatchedLogs = recentLogs.slice(0, 10);
 
-  const recentlyWatchedMovies: TmdbMovie[] = recentlyWatchedLogs.map((log, index) => {
+  const recentlyWatchedMovies: MovieWithLogId[] = recentlyWatchedLogs.map((log) => {
     const cached = movieCache[log.tmdbId];
     return {
-      id: log.tmdbId + index * 1000000, // Create unique IDs to avoid collision
+      id: log.id, // Use the actual log ID as unique identifier
       title: cached?.title || `Movie ${log.tmdbId}`,
       poster_path: cached?.posterPath || null,
       backdrop_path: null,
@@ -86,16 +92,16 @@ export default function ProfileScreen({ navigation }: ProfileScreenProps) {
       original_title: cached?.title || `Movie ${log.tmdbId}`,
       popularity: 0,
       video: false,
+      tmdbId: log.tmdbId, // Keep tmdbId for navigation
     };
   });
 
-  // Construir datos de usuario para las películas recientes
+  // Construir datos de usuario para las películas recientes usando log.id
   const recentMoviesUserData: {
-    [movieId: number]: { rating?: number; hadSeenBefore?: boolean };
+    [logId: string]: { rating?: number; hadSeenBefore?: boolean };
   } = {};
-  recentlyWatchedLogs.forEach((log, index) => {
-    const uniqueId = log.tmdbId + index * 1000000; // Same unique ID system
-    recentMoviesUserData[uniqueId] = {
+  recentlyWatchedLogs.forEach((log) => {
+    recentMoviesUserData[log.id] = {
       rating: log.rating,
       hadSeenBefore: log.hadSeenBefore,
     };
@@ -114,10 +120,10 @@ export default function ProfileScreen({ navigation }: ProfileScreenProps) {
     setRefreshing(false);
   };
 
-  const handleMoviePress = (movie: TmdbMovie) => {
-    // Extract original tmdbId from the potentially modified ID
-    const originalTmdbId = movie.id >= 1000000 ? movie.id % 1000000 : movie.id;
-    navigation.navigate('MovieDetails', { movieId: originalTmdbId });
+  const handleMoviePress = (movie: TmdbMovie | MovieWithLogId) => {
+    // Use tmdbId if available (for log movies), otherwise use id (for favorites)
+    const tmdbId = 'tmdbId' in movie ? movie.tmdbId : movie.id;
+    navigation.navigate('MovieDetails', { movieId: tmdbId });
   };
 
   useEffect(() => {
@@ -222,7 +228,7 @@ export default function ProfileScreen({ navigation }: ProfileScreenProps) {
       {recentlyWatchedMovies.length > 0 && (
         <MovieCarousel
           title={`${user.displayName}'s Recent Watched`}
-          movies={recentlyWatchedMovies}
+          movies={recentlyWatchedMovies as unknown as TmdbMovie[]}
           onMoviePress={handleMoviePress}
           showUserRatings={true}
           movieUserData={recentMoviesUserData}

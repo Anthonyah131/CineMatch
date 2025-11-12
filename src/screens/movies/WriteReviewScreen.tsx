@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -16,6 +16,8 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import { Formik } from 'formik';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useWriteReview } from '../../hooks/movies/useWriteReview';
+import { useEditLog } from '../../hooks/diary/useEditLog';
+import { useLogDetails } from '../../hooks/diary/useLogDetails';
 import { useModal } from '../../context/ModalContext';
 import {
   writeReviewSchema,
@@ -31,6 +33,7 @@ interface WriteReviewScreenProps {
   route: {
     params: {
       movieDetails: TmdbMovieDetails;
+      editLogId?: string;
     };
   };
   navigation: any;
@@ -40,14 +43,46 @@ export default function WriteReviewScreen({
   route,
   navigation,
 }: WriteReviewScreenProps) {
-  const { movieDetails } = route.params;
+  const { movieDetails, editLogId } = route.params;
   const [watchedDate, setWatchedDate] = useState<Date | null>(null);
   const [showDatePicker, setShowDatePicker] = useState(false);
   const year = movieDetails.release_date
     ? new Date(movieDetails.release_date).getFullYear()
     : 'N/A';
 
-  const { isSubmitting, submitReview, error } = useWriteReview();
+  // Hooks for create and edit modes
+  const { isSubmitting: isSubmittingReview, submitReview, error: reviewError } = useWriteReview();
+  const { isSubmitting: isEditingLog, updateLog, error: editError } = useEditLog();
+  const { log: existingLog, isLoading: loadingLog } = useLogDetails(editLogId || '');
+
+  const isEditMode = !!editLogId;
+  const isSubmitting = isSubmittingReview || isEditingLog;
+  const error = reviewError || editError;
+
+  // Initialize form values based on mode
+  const getFormInitialValues = () => {
+    if (isEditMode && existingLog) {
+      // Convert existing log to form values
+      return {
+        tmdbId: existingLog.tmdbId,
+        mediaType: existingLog.mediaType,
+        hadSeenBefore: existingLog.hadSeenBefore || false,
+        rating: existingLog.rating,
+        review: existingLog.review || '',
+        notes: existingLog.notes || '',
+      };
+    } else {
+      return getInitialReviewValues(movieDetails.id);
+    }
+  };
+
+  // Set watched date from existing log when in edit mode
+  useEffect(() => {
+    if (isEditMode && existingLog && existingLog.watchedAt) {
+      const date = new Date(existingLog.watchedAt._seconds * 1000);
+      setWatchedDate(date);
+    }
+  }, [isEditMode, existingLog]);
   const modal = useModal();
 
   const handleBack = () => {
@@ -62,22 +97,44 @@ export default function WriteReviewScreen({
   };
 
   const handleSubmit = async (values: LogMediaViewDto) => {
-    // El hook se encarga de construir el DTO correctamente
-    const success = await submitReview(values, watchedDate);
-
-    if (success) {
-      modal.showSuccess(
-        '¡Review publicada!',
-        'Gracias por compartir tu opinión sobre esta película.',
-        () => {
-          navigation.goBack();
-        },
-      );
+    let success = false;
+    
+    if (isEditMode && editLogId) {
+      // Edit existing log
+      success = await updateLog(editLogId, values);
+      
+      if (success) {
+        modal.showSuccess(
+          'Log updated!',
+          'Your log has been updated successfully.',
+          () => {
+            navigation.goBack();
+          },
+        );
+      } else {
+        modal.showError(
+          'Error updating log',
+          error || 'Failed to update your log. Please try again.',
+        );
+      }
     } else {
-      modal.showError(
-        'Error al publicar',
-        error || 'No se pudo enviar tu review. Por favor intenta nuevamente.',
-      );
+      // Create new log
+      success = await submitReview(values, watchedDate);
+
+      if (success) {
+        modal.showSuccess(
+          '¡Review publicada!',
+          'Gracias por compartir tu opinión sobre esta película.',
+          () => {
+            navigation.goBack();
+          },
+        );
+      } else {
+        modal.showError(
+          'Error al publicar',
+          error || 'No se pudo enviar tu review. Por favor intenta nuevamente.',
+        );
+      }
     }
   };
 
@@ -114,9 +171,19 @@ export default function WriteReviewScreen({
     return stars;
   };
 
+  // Show loading state when loading existing log in edit mode
+  if (isEditMode && loadingLog) {
+    return (
+      <View style={[styles.container, styles.loadingContainer]}>
+        <ActivityIndicator size="large" color={COLORS.primary} />
+        <Text style={styles.loadingText}>Loading log...</Text>
+      </View>
+    );
+  }
+
   return (
     <Formik
-      initialValues={getInitialReviewValues(movieDetails.id)}
+      initialValues={getFormInitialValues()}
       validationSchema={writeReviewSchema}
       onSubmit={handleSubmit}
     >
@@ -135,7 +202,9 @@ export default function WriteReviewScreen({
             <TouchableOpacity onPress={handleBack} style={styles.backButton}>
               <Icon name="arrow-back" size={24} color={COLORS.text} />
             </TouchableOpacity>
-            <Text style={styles.headerTitle}>Write Your Review</Text>
+            <Text style={styles.headerTitle}>
+              {isEditMode ? 'Edit Log' : 'Write Your Review'}
+            </Text>
           </View>
 
           {/* Movie Info Section */}
@@ -464,5 +533,15 @@ const styles = StyleSheet.create({
   },
   bottomPadding: {
     height: 40,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: 12,
+  },
+  loadingText: {
+    fontSize: 16,
+    color: COLORS.textSecondary,
   },
 });

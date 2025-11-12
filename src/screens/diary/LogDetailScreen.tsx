@@ -20,6 +20,7 @@ import { useLogDetails } from '../../hooks/diary/useLogDetails';
 import { useLoading } from '../../context/LoadingContext';
 import { useModal } from '../../context/ModalContext';
 import { formatWatchDate } from '../../utils/dateFormatter';
+import { ActionModal } from '../../components/ui/ActionModal';
 
 type LogDetailRouteProp = RouteProp<HomeStackParamList, 'LogDetail'>;
 type LogDetailNavigationProp = CompositeNavigationProp<
@@ -34,6 +35,7 @@ export default function LogDetailScreen() {
   const { log, mediaData, isLoading, error, refreshLog, deleteLog } = useLogDetails(logId);
   const { showLoading, hideLoading } = useLoading();
   const { showConfirm, showSuccess, showError } = useModal();
+  const [showActionModal, setShowActionModal] = React.useState(false);
 
   const handleDelete = () => {
     showConfirm(
@@ -53,6 +55,59 @@ export default function LogDetailScreen() {
       }
     );
   };
+
+  const handleEdit = () => {
+    if (log && mediaData) {
+      // Create movieDetails object for WriteReview screen
+      const movieDetails = {
+        id: log.tmdbId,
+        title: mediaData.title || 'Unknown Title',
+        overview: '',
+        poster_path: mediaData.posterPath || null,
+        backdrop_path: null,
+        release_date: mediaData.releaseYear ? `${mediaData.releaseYear}-01-01` : '',
+        vote_average: mediaData.voteAverage || 0,
+        vote_count: 0,
+        popularity: 0,
+        adult: false,
+        original_language: 'en',
+        original_title: mediaData.title || 'Unknown Title',
+        video: false,
+        belongs_to_collection: null,
+        budget: 0,
+        genres: [],
+        homepage: null,
+        imdb_id: null,
+        production_companies: [],
+        production_countries: [],
+        revenue: 0,
+        runtime: null,
+        spoken_languages: [],
+        status: 'Released' as const,
+        tagline: null,
+      };
+
+      navigation.navigate('WriteReview', { 
+        movieDetails, 
+        editLogId: logId 
+      });
+    }
+  };
+
+  const actionModalActions = [
+    {
+      title: 'Edit Log',
+      icon: 'pencil-outline',
+      color: COLORS.primary,
+      onPress: handleEdit,
+    },
+    {
+      title: 'Delete Log',
+      icon: 'trash-outline',
+      destructive: true,
+      onPress: handleDelete,
+    },
+  ];
 
   const handlePosterPress = () => {
     if (log) {
@@ -129,8 +184,11 @@ export default function LogDetailScreen() {
           <Icon name="arrow-back" size={24} color={COLORS.text} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Log Details</Text>
-        <TouchableOpacity onPress={handleDelete} style={styles.deleteButton}>
-          <Icon name="trash-outline" size={22} color={COLORS.error} />
+        <TouchableOpacity 
+          onPress={() => setShowActionModal(true)} 
+          style={styles.menuButton}
+        >
+          <Icon name="ellipsis-vertical" size={22} color={COLORS.text} />
         </TouchableOpacity>
       </View>
 
@@ -181,29 +239,37 @@ export default function LogDetailScreen() {
 
         <View style={styles.divider} />
 
-        {log.rating && (
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>My Rating</Text>
-            {renderStars()}
-          </View>
-        )}
-
+        {/* Compact Info Section */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Watched On</Text>
-          <View style={styles.infoRow}>
-            <Icon name="calendar-outline" size={18} color={COLORS.textSecondary} />
-            <Text style={styles.infoText}>{watchDate}</Text>
+          <View style={styles.compactInfoContainer}>
+            {/* Rating */}
+            {log.rating && (
+              <View style={styles.compactInfoItem}>
+                <Text style={styles.compactLabel}>My Rating</Text>
+                {renderStars()}
+              </View>
+            )}
+
+            {/* Watch Date */}
+            <View style={styles.compactInfoItem}>
+              <Text style={styles.compactLabel}>Watched On</Text>
+              <View style={styles.infoRow}>
+                <Icon name="calendar-outline" size={16} color={COLORS.textSecondary} />
+                <Text style={styles.compactInfoText}>{watchDate}</Text>
+              </View>
+            </View>
+
+            {/* Rewatch Badge */}
+            {log.hadSeenBefore && (
+              <View style={styles.compactInfoItem}>
+                <View style={styles.rewatchBadge}>
+                  <Icon name="refresh" size={16} color={COLORS.info} />
+                  <Text style={styles.rewatchText}>Rewatch</Text>
+                </View>
+              </View>
+            )}
           </View>
         </View>
-
-        {log.hadSeenBefore && (
-          <View style={styles.section}>
-            <View style={styles.rewatchBadge}>
-              <Icon name="refresh" size={18} color={COLORS.info} />
-              <Text style={styles.rewatchText}>Rewatch</Text>
-            </View>
-          </View>
-        )}
 
         {log.review && (
           <View style={styles.section}>
@@ -224,6 +290,13 @@ export default function LogDetailScreen() {
           </View>
         )}
       </ScrollView>
+
+      <ActionModal
+        visible={showActionModal}
+        onClose={() => setShowActionModal(false)}
+        title="Log Actions"
+        actions={actionModalActions}
+      />
     </SafeAreaView>
   );
 }
@@ -250,7 +323,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: COLORS.text,
   },
-  deleteButton: {
+  menuButton: {
     padding: 4,
   },
   loadingContainer: {
@@ -358,6 +431,26 @@ const styles = StyleSheet.create({
   },
   section: {
     marginBottom: 20,
+  },
+  compactInfoContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 20,
+    justifyContent: 'space-between',
+  },
+  compactInfoItem: {
+    minWidth: '45%',
+    marginBottom: 12,
+  },
+  compactLabel: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: COLORS.textSecondary,
+    marginBottom: 6,
+  },
+  compactInfoText: {
+    fontSize: 15,
+    color: COLORS.text,
   },
   sectionTitle: {
     fontSize: 16,

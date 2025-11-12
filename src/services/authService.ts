@@ -39,7 +39,7 @@ export const signInWithGoogle = async (): Promise<AuthResponse> => {
         await auth().signOut();
         await clearStorage();
       } catch (logoutError) {
-        console.log('⚠️ [DEV] Error al limpiar sesión:', logoutError);
+        // Ignore cleanup errors in development
       }
     }
 
@@ -55,7 +55,6 @@ export const signInWithGoogle = async (): Promise<AuthResponse> => {
     );
 
     const firebaseToken = await firebaseUserCredential.user.getIdToken();
-
     const backendResponse = await loginWithBackend(firebaseToken);
 
     return backendResponse;
@@ -66,9 +65,11 @@ export const signInWithGoogle = async (): Promise<AuthResponse> => {
       throw new Error('Login ya en progreso');
     } else if (error.code === 'PLAY_SERVICES_NOT_AVAILABLE') {
       throw new Error('Google Play Services no disponible');
+    } else if (error.message?.includes('activity is null')) {
+      throw new Error('Error de conexión - Intenta reiniciar la app');
     }
 
-    throw new Error('Error al iniciar sesión con Google');
+    throw new Error(`Error Google Sign-In: ${error.message || 'Desconocido'}`);
   }
 };
 

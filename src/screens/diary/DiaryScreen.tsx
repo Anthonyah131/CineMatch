@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
   View,
   Text,
-  FlatList,
+  SectionList,
   StyleSheet,
   RefreshControl,
   ActivityIndicator,
@@ -21,24 +21,64 @@ import { mediaCacheService } from '../../services/mediaCacheService';
 import type { MediaLog } from '../../types/mediaLog.types';
 import type { MediaCache } from '../../types/mediaCache.types';
 
+interface LogSection {
+  title: string;
+  data: MediaLog[];
+}
+
 export default function DiaryScreen() {
-  const navigation = useNavigation<NativeStackNavigationProp<HomeStackParamList>>();
-  const { logs, isLoading, error, refreshLogs, hasMore, loadMore } = useDiaryLogs(20);
+  const navigation =
+    useNavigation<NativeStackNavigationProp<HomeStackParamList>>();
+  const { logs, isLoading, error, refreshLogs, hasMore, loadMore } =
+    useDiaryLogs(20);
   const [mediaCache, setMediaCache] = useState<Record<string, MediaCache>>({});
   const [loadingMore, setLoadingMore] = useState(false);
+
+  // Group logs by year and month
+  const groupedLogs = useMemo(() => {
+    const groups: Record<string, MediaLog[]> = {};
+
+    logs.forEach(log => {
+      const date = new Date(log.watchedAt._seconds * 1000);
+      const year = date.getFullYear();
+      const month = date.toLocaleDateString('en-US', { month: 'long' });
+      const key = `${month} ${year}`;
+
+      if (!groups[key]) {
+        groups[key] = [];
+      }
+      groups[key].push(log);
+    });
+
+    // Convert to section array and sort by date (newest first)
+    const sections: LogSection[] = Object.entries(groups).map(
+      ([title, data]) => ({
+        title,
+        data: data.sort((a, b) => b.watchedAt._seconds - a.watchedAt._seconds),
+      }),
+    );
+
+    // Sort sections by date (newest first)
+    return sections.sort((a, b) => {
+      const dateA = new Date(a.data[0]?.watchedAt._seconds * 1000);
+      const dateB = new Date(b.data[0]?.watchedAt._seconds * 1000);
+      return dateB.getTime() - dateA.getTime();
+    });
+  }, [logs]);
 
   // Fetch media data from cache
   useEffect(() => {
     const fetchMediaData = async () => {
-      const cachePromises = logs.map(async (log) => {
+      const cachePromises = logs.map(async log => {
         const cacheKey = `${log.tmdbId}-${log.mediaType}`;
         if (mediaCache[cacheKey]) return null;
 
         try {
-          const response = log.mediaType === 'movie'
-            ? await mediaCacheService.getMovie(log.tmdbId)
-            : await mediaCacheService.getTVShow(log.tmdbId);
-          
+          const response =
+            log.mediaType === 'movie'
+              ? await mediaCacheService.getMovie(log.tmdbId)
+              : await mediaCacheService.getTVShow(log.tmdbId);
+
           return {
             key: cacheKey,
             data: response.data,
@@ -51,14 +91,14 @@ export default function DiaryScreen() {
 
       const results = await Promise.all(cachePromises);
       const newCache: Record<string, MediaCache> = {};
-      results.forEach((result) => {
+      results.forEach(result => {
         if (result) {
           newCache[result.key] = result.data;
         }
       });
 
       if (Object.keys(newCache).length > 0) {
-        setMediaCache((prev) => ({ ...prev, ...newCache }));
+        setMediaCache(prev => ({ ...prev, ...newCache }));
       }
     };
 
@@ -79,11 +119,35 @@ export default function DiaryScreen() {
     setLoadingMore(false);
   };
 
+  const renderSectionHeader = ({ section }: { section: LogSection }) => (
+    <View style={styles.sectionHeader}>
+      <Text style={styles.sectionHeaderText}>{section.title}</Text>
+      <Text style={styles.sectionHeaderCount}>
+        {section.data.length} {section.data.length === 1 ? 'entry' : 'entries'}
+      </Text>
+    </View>
+  );
+
+  const renderLogItem = ({ item }: { item: MediaLog }) => {
+    const cacheKey = `${item.tmdbId}-${item.mediaType}`;
+    const media = mediaCache[cacheKey];
+    return (
+      <DiaryLogItem
+        log={item}
+        onPress={handleLogPress}
+        movieTitle={media?.title}
+        posterPath={media?.posterPath}
+      />
+    );
+  };
+
   const renderFooter = () => {
     if (!hasMore) return null;
     return (
       <View style={styles.footer}>
-        {loadingMore && <ActivityIndicator size="small" color={COLORS.primary} />}
+        {loadingMore && (
+          <ActivityIndicator size="small" color={COLORS.primary} />
+        )}
       </View>
     );
   };
@@ -92,7 +156,10 @@ export default function DiaryScreen() {
     <SafeAreaView style={styles.container} edges={['top']}>
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+        <TouchableOpacity
+          onPress={() => navigation.goBack()}
+          style={styles.backButton}
+        >
           <Icon name="arrow-back" size={24} color={COLORS.text} />
         </TouchableOpacity>
         <View style={styles.headerContent}>
@@ -119,22 +186,13 @@ export default function DiaryScreen() {
       ) : logs.length === 0 ? (
         <EmptyDiary />
       ) : (
-        <FlatList
-          data={logs}
-          keyExtractor={(item) => item.id}
-          renderItem={({ item }) => {
-            const cacheKey = `${item.tmdbId}-${item.mediaType}`;
-            const media = mediaCache[cacheKey];
-            return (
-              <DiaryLogItem
-                log={item}
-                onPress={handleLogPress}
-                movieTitle={media?.title}
-                posterPath={media?.posterPath}
-              />
-            );
-          }}
+        <SectionList
+          sections={groupedLogs}
+          keyExtractor={item => item.id}
+          renderItem={renderLogItem}
+          renderSectionHeader={renderSectionHeader}
           contentContainerStyle={styles.listContent}
+          stickySectionHeadersEnabled={false}
           refreshControl={
             <RefreshControl
               refreshing={false}
@@ -210,5 +268,26 @@ const styles = StyleSheet.create({
   footer: {
     paddingVertical: 20,
     alignItems: 'center',
+  },
+  sectionHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    backgroundColor: COLORS.surface,
+    borderRadius: 12,
+    marginBottom: 8,
+    marginTop: 16,
+  },
+  sectionHeaderText: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: COLORS.text,
+  },
+  sectionHeaderCount: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: COLORS.textSecondary,
   },
 });

@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { useFocusEffect } from '@react-navigation/native';
 import { mediaLogsService } from '../../services/mediaLogsService';
 import { mediaCacheService } from '../../services/mediaCacheService';
 import type { MediaLog } from '../../types/mediaLog.types';
@@ -55,6 +56,15 @@ export function useLogDetails(logId: string): UseLogDetailsResult {
   useEffect(() => {
     fetchLog();
   }, [fetchLog]);
+
+  // Refresh when screen comes into focus (after editing)
+  useFocusEffect(
+    useCallback(() => {
+      if (logId) {
+        fetchLog();
+      }
+    }, [logId, fetchLog])
+  );
 
   const refreshLog = useCallback(async () => {
     await fetchLog();

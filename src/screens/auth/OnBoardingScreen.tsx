@@ -1,44 +1,55 @@
-import React from 'react';
-import { View, Text, StyleSheet, Image, Dimensions } from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  ImageBackground,
+  Dimensions,
+} from 'react-native';
+import LinearGradient from 'react-native-linear-gradient';
 import CustomButton from '../../components/ui/buttons/CustomButton';
 import { COLORS } from '../../config/colors';
 
-const { width } = Dimensions.get('window');
+const { width, height } = Dimensions.get('window');
 
 export default function OnBoardingScreen({ navigation }: any) {
   return (
     <View style={styles.container}>
-      {/* Imagen de portada */}
-      <Image
-        source={{ uri: 'https://i.imgur.com/2nCt3Sbl.jpg' }}
-        style={styles.image}
-        resizeMode="cover"
-      />
+      <View style={styles.imageSection}>
+        <ImageBackground
+          source={require('../../assets/images/theatre-416058.jpg')}
+          style={styles.backgroundImage}
+          resizeMode="cover"
+        >
+          <LinearGradient
+            colors={[
+              'rgba(0,0,0,0.9)',
+              'rgba(0,0,0,0.6)',
+              'rgba(0,0,0,0.35)',
+              'rgba(0,0,0,0)',
+            ]}
+            start={{ x: 0.5, y: 1 }}
+            end={{ x: 0.5, y: 0 }}
+            style={styles.backdropGradient}
+          />
+        </ImageBackground>
+      </View>
 
-      {/* Contenido inferior */}
-      <View style={styles.content}>
-        {/* Logo y título */}
-        <View style={styles.logoRow}>
-          <View style={styles.circleGreen} />
-          <View style={styles.circleOrange} />
-          <View style={styles.circleBlue} />
-          <View style={styles.circleCyan} />
-        </View>
+      <View style={styles.logoContainer}>
+        <Text style={styles.logo}>CineMatch</Text>
+      </View>
 
-        <Text style={styles.title}>Letterboxd</Text>
-
-        {/* Descripción */}
+      <View style={styles.bottomSection}>
         <Text style={styles.description}>
-          “Track films you’ve watched. Save those you want to see. Tell your
-          friends what’s good.”
+          "Discover films, track your cinematic journey, and connect with fellow
+          movie lovers to share recommendations and celebrate the magic of
+          cinema."
         </Text>
 
-        {/* Botón reutilizable */}
         <CustomButton
           title="Get Started"
           onPress={() => navigation.navigate('Login')}
-          backgroundColor="#E69CA3"
-          textColor="#1A1A1A"
+          backgroundColor={COLORS.primary}
+          textColor={COLORS.background}
         />
       </View>
     </View>
@@ -50,68 +61,52 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: COLORS.background,
   },
-  image: {
+  imageSection: {
+    height: height * 0.5,
     width: width,
-    height: '55%',
   },
-  content: {
+  backgroundImage: {
+    flex: 1,
+    width: '100%',
+  },
+  backdropGradient: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    height: '60%',
+  },
+  logoContainer: {
+    position: 'absolute',
+    top: height * 0.5 - 50,
+    left: 0,
+    right: 0,
+    alignItems: 'center',
+    zIndex: 10,
+  },
+  logo: {
+    color: COLORS.primary,
+    fontSize: 50,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    letterSpacing: 2,
+    fontFamily: 'serif',
+  },
+  bottomSection: {
     flex: 1,
     backgroundColor: COLORS.background,
-    borderTopLeftRadius: 30,
-    borderTopRightRadius: 30,
-    padding: 24,
-    alignItems: 'center',
     justifyContent: 'center',
-  },
-  logoRow: {
-    flexDirection: 'row',
-    marginBottom: 10,
-  },
-  circle: {
-    width: 20,
-    height: 20,
-    borderRadius: 10,
-    marginHorizontal: 5,
-  },
-  circleGreen: {
-    width: 20,
-    height: 20,
-    borderRadius: 10,
-    marginHorizontal: 5,
-    backgroundColor: COLORS.success,
-  },
-  circleOrange: {
-    width: 20,
-    height: 20,
-    borderRadius: 10,
-    marginHorizontal: 5,
-    backgroundColor: COLORS.warning,
-  },
-  circleBlue: {
-    width: 20,
-    height: 20,
-    borderRadius: 10,
-    marginHorizontal: 5,
-    backgroundColor: COLORS.info,
-  },
-  circleCyan: {
-    width: 20,
-    height: 20,
-    borderRadius: 10,
-    marginHorizontal: 5,
-    backgroundColor: COLORS.info,
-  },
-  title: {
-    color: COLORS.text,
-    fontSize: 22,
-    fontWeight: 'bold',
-    marginBottom: 12,
+    alignItems: 'center',
+    padding: 24,
+    paddingTop: 10,
   },
   description: {
-    color: COLORS.textSecondary,
-    fontSize: 15,
+    color: COLORS.text,
+    fontSize: 16,
     textAlign: 'center',
-    marginBottom: 20,
-    paddingHorizontal: 10,
+    marginBottom: 40,
+    paddingHorizontal: 20,
+    lineHeight: 24,
+    fontFamily: 'serif',
   },
 });
