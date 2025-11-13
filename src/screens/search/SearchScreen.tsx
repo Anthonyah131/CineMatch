@@ -4,12 +4,13 @@ import {
   StyleSheet,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { SearchInput, SearchResults, UserSearchResults, ForumSearchResults, SearchTabs } from '../../components/screens/search';
-import { useMovieSearch, useUserSearch, useForumSearch } from '../../hooks/search';
+import { SearchInput, SearchResults, UserSearchResults, ForumSearchResults, ListSearchResults, SearchTabs } from '../../components/screens/search';
+import { useMovieSearch, useUserSearch, useForumSearch, useListSearch } from '../../hooks/search';
 import type { SearchTabType } from '../../components/screens/search/SearchTabs';
 import type { TmdbMovie } from '../../types/tmdb.types';
 import type { User } from '../../types/user.types';
 import type { ForumSummary } from '../../types/forum.types';
+import type { ListWithOwner } from '../../types/list.types';
 import { COLORS } from '../../config/colors';
 
 interface SearchScreenProps {
@@ -24,6 +25,7 @@ export const SearchScreen: React.FC<SearchScreenProps> = ({ navigation }) => {
   const movieSearch = useMovieSearch();
   const userSearch = useUserSearch();
   const forumSearch = useForumSearch();
+  const listSearch = useListSearch();
 
   // Efecto para sincronizar query con los hooks
   useEffect(() => {
@@ -34,6 +36,9 @@ export const SearchScreen: React.FC<SearchScreenProps> = ({ navigation }) => {
         break;
       case 'users':
         userSearch.setQuery(searchQuery);
+        break;
+      case 'lists':
+        listSearch.setQuery(searchQuery);
         break;
       // Para movies mantener la lógica anterior por ahora
     }
@@ -54,6 +59,9 @@ export const SearchScreen: React.FC<SearchScreenProps> = ({ navigation }) => {
         case 'forums':
           forumSearch.setQuery(searchQuery);
           break;
+        case 'lists':
+          listSearch.setQuery(searchQuery);
+          break;
       }
     }
   };
@@ -63,6 +71,7 @@ export const SearchScreen: React.FC<SearchScreenProps> = ({ navigation }) => {
     movieSearch.clearSearch();
     userSearch.clearSearch();
     forumSearch.clearSearch();
+    listSearch.clearSearch();
   };
 
   const handleSearchSubmit = () => {
@@ -78,6 +87,9 @@ export const SearchScreen: React.FC<SearchScreenProps> = ({ navigation }) => {
         case 'forums':
           forumSearch.searchForums(searchQuery.trim());
           break;
+        case 'lists':
+          listSearch.searchLists(searchQuery.trim());
+          break;
       }
     }
   };
@@ -92,6 +104,10 @@ export const SearchScreen: React.FC<SearchScreenProps> = ({ navigation }) => {
 
   const handleForumPress = (forum: ForumSummary) => {
     navigation.navigate('ForumDetails', { forumId: forum.forumId });
+  };
+
+  const handleListPress = (list: ListWithOwner) => {
+    navigation.navigate('ListDetails', { listId: list.id });
   };
 
   const renderResults = () => {
@@ -133,6 +149,17 @@ export const SearchScreen: React.FC<SearchScreenProps> = ({ navigation }) => {
           />
         );
       
+      case 'lists':
+        return (
+          <ListSearchResults
+            lists={listSearch.lists}
+            loading={listSearch.loading}
+            error={listSearch.error}
+            hasSearched={listSearch.hasSearched}
+            onListPress={handleListPress}
+          />
+        );
+      
       default:
         return null;
     }
@@ -145,9 +172,10 @@ export const SearchScreen: React.FC<SearchScreenProps> = ({ navigation }) => {
         onChangeText={setSearchQuery}
         onClear={handleClearSearch}
         onSubmitEditing={handleSearchSubmit}
-        placeholder={`Search ${
-          activeTab === 'movies' ? 'movies' : 
-          activeTab === 'users' ? 'users' : 'forums'
+        placeholder={`Buscar ${
+          activeTab === 'movies' ? 'películas' : 
+          activeTab === 'users' ? 'usuarios' : 
+          activeTab === 'forums' ? 'foros' : 'listas'
         }...`}
       />
       
@@ -157,6 +185,7 @@ export const SearchScreen: React.FC<SearchScreenProps> = ({ navigation }) => {
         movieCount={movieSearch.movies.length}
         userCount={userSearch.users.length}
         forumCount={forumSearch.forums.length}
+        listCount={listSearch.lists.length}
       />
 
       <View style={styles.resultsContainer}>

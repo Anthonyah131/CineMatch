@@ -1,28 +1,28 @@
 import { useState, useEffect, useCallback } from 'react';
-import { forumsService } from '../../services/forumsService';
-import type { ForumSummary } from '../../types/forum.types';
+import { listsService } from '../../services/listsService';
+import type { ListWithOwner } from '../../types/list.types';
 
-export interface UseForumSearchReturn {
+export interface UseListSearchReturn {
   query: string;
-  forums: ForumSummary[];
+  lists: ListWithOwner[];
   loading: boolean;
   error: string | null;
   hasSearched: boolean;
-  searchForums: (searchQuery: string) => Promise<void>;
+  searchLists: (searchQuery: string) => Promise<void>;
   clearSearch: () => void;
   setQuery: (query: string) => void;
 }
 
-export const useForumSearch = (): UseForumSearchReturn => {
+export const useListSearch = (): UseListSearchReturn => {
   const [query, setQuery] = useState('');
-  const [forums, setForums] = useState<ForumSummary[]>([]);
+  const [lists, setLists] = useState<ListWithOwner[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [hasSearched, setHasSearched] = useState(false);
 
-  const searchForums = useCallback(async (searchQuery: string) => {
+  const searchLists = useCallback(async (searchQuery: string) => {
     if (!searchQuery.trim()) {
-      setForums([]);
+      setLists([]);
       setHasSearched(false);
       setError(null);
       return;
@@ -33,14 +33,14 @@ export const useForumSearch = (): UseForumSearchReturn => {
 
     try {
       // Usar el nuevo método del servicio para buscar en el servidor
-      const filteredForums = await forumsService.searchForums(searchQuery.trim());
+      const filteredLists = await listsService.searchPublicLists(searchQuery.trim());
       
-      setForums(filteredForums);
+      setLists(filteredLists);
       setHasSearched(true);
     } catch (err) {
-      console.error('Error searching forums:', err);
-      setError('No se pudieron buscar los foros. Intenta nuevamente.');
-      setForums([]);
+      console.error('Error searching lists:', err);
+      setError('No se pudieron buscar las listas. Intenta nuevamente.');
+      setLists([]);
     } finally {
       setLoading(false);
     }
@@ -48,7 +48,7 @@ export const useForumSearch = (): UseForumSearchReturn => {
 
   const clearSearch = useCallback(() => {
     setQuery('');
-    setForums([]);
+    setLists([]);
     setHasSearched(false);
     setError(null);
   }, []);
@@ -56,7 +56,7 @@ export const useForumSearch = (): UseForumSearchReturn => {
   // Auto search with debounce effect - solo cuando query cambia internamente
   useEffect(() => {
     if (!query) {
-      setForums([]);
+      setLists([]);
       setHasSearched(false);
       setError(null);
       return;
@@ -64,20 +64,20 @@ export const useForumSearch = (): UseForumSearchReturn => {
 
     const timeoutId = setTimeout(() => {
       if (query.trim().length >= 2) {
-        searchForums(query);
+        searchLists(query);
       }
     }, 1500);
 
     return () => clearTimeout(timeoutId);
-  }, [query, searchForums]);
+  }, [query, searchLists]);
     
   return {
     query,
-    forums,
+    lists,
     loading,
     error,
     hasSearched,
-    searchForums,
+    searchLists,
     clearSearch,
     setQuery,
   };

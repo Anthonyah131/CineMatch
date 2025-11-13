@@ -31,6 +31,13 @@ export interface List {
 }
 
 /**
+ * Lista con información del dueño (para búsquedas)
+ */
+export interface ListWithOwner extends List {
+  ownerDisplayName: string;
+}
+
+/**
  * Item de una lista
  */
 export interface ListItem {

@@ -2,3 +2,4 @@
 export { useMovieSearch } from './useMovieSearch';
 export { useUserSearch } from './useUserSearch';
 export { useForumSearch } from './useForumSearch';
+export { useListSearch } from './useListSearch';

@@ -1,6 +1,7 @@
 import { apiClient } from './api/apiClient';
 import type {
   List,
+  ListWithOwner,
   ListItem,
   CreateListDto,
   UpdateListDto,
@@ -111,9 +112,10 @@ class ListsService {
     query: string,
     page: number = 1,
     limit: number = 20,
-  ): Promise<List[]> {
+  ): Promise<ListWithOwner[]> {
     const params = new URLSearchParams({ q: query, page: page.toString(), limit: limit.toString() });
-    return apiClient.get<List[]>(`${this.baseUrl}/search?${params.toString()}`);
+    const response = await apiClient.get<{ items: ListWithOwner[]; total: number; page: number; limit: number }>(`${this.baseUrl}/search?${params.toString()}`);
+    return response.items;
   }
 }
 

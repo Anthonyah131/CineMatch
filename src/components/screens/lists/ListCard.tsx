@@ -9,12 +9,12 @@ import {
 import Icon from 'react-native-vector-icons/Ionicons';
 import { COLORS } from '../../../config/colors';
 import { buildPosterUrl } from '../../../utils/tmdbImageHelpers';
-import type { List } from '../../../types/list.types';
+import type { List, ListWithOwner } from '../../../types/list.types';
 
 interface ListCardProps {
-  list: List;
-  onPress: (list: List) => void;
-  onOptionsPress?: (list: List) => void;
+  list: List | ListWithOwner;
+  onPress: (list: List | ListWithOwner) => void;
+  onOptionsPress?: (list: List | ListWithOwner) => void;
 }
 
 export const ListCard: React.FC<ListCardProps> = ({

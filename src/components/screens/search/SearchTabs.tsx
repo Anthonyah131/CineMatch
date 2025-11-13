@@ -8,7 +8,7 @@ import {
 import Icon from 'react-native-vector-icons/Ionicons';
 import { COLORS } from '../../../config/colors';
 
-export type SearchTabType = 'movies' | 'users' | 'forums';
+export type SearchTabType = 'movies' | 'users' | 'forums' | 'lists';
 
 interface SearchTabsProps {
   activeTab: SearchTabType;
@@ -16,6 +16,7 @@ interface SearchTabsProps {
   movieCount?: number;
   userCount?: number;
   forumCount?: number;
+  listCount?: number;
 }
 
 export const SearchTabs: React.FC<SearchTabsProps> = ({
@@ -24,6 +25,7 @@ export const SearchTabs: React.FC<SearchTabsProps> = ({
   movieCount,
   userCount,
   forumCount,
+  listCount,
 }) => {
   return (
     <View style={styles.container}>
@@ -117,7 +119,7 @@ export const SearchTabs: React.FC<SearchTabsProps> = ({
             styles.tabText,
             activeTab === 'forums' && styles.activeTabText,
           ]}>
-            Forums
+            Foros
           </Text>
           {forumCount !== undefined && forumCount > 0 && (
             <View style={[
@@ -129,6 +131,42 @@ export const SearchTabs: React.FC<SearchTabsProps> = ({
                 activeTab === 'forums' && styles.activeBadgeText,
               ]}>
                 {forumCount > 99 ? '99+' : forumCount}
+              </Text>
+            </View>
+          )}
+        </View>
+      </TouchableOpacity>
+
+      <TouchableOpacity
+        style={[
+          styles.tab,
+          activeTab === 'lists' && styles.activeTab,
+        ]}
+        onPress={() => onTabChange('lists')}
+        activeOpacity={0.7}
+      >
+        <View style={styles.tabContent}>
+          <Icon 
+            name="list-outline" 
+            size={20} 
+            color={activeTab === 'lists' ? COLORS.background : COLORS.textSecondary} 
+          />
+          <Text style={[
+            styles.tabText,
+            activeTab === 'lists' && styles.activeTabText,
+          ]}>
+            Listas
+          </Text>
+          {listCount !== undefined && listCount > 0 && (
+            <View style={[
+              styles.badge,
+              activeTab === 'lists' && styles.activeBadge,
+            ]}>
+              <Text style={[
+                styles.badgeText,
+                activeTab === 'lists' && styles.activeBadgeText,
+              ]}>
+                {listCount > 99 ? '99+' : listCount}
               </Text>
             </View>
           )}

@@ -37,7 +37,6 @@ export const useUserForums = (): UseUserForumsReturn => {
       setError(null);
 
       const userForums = await forumsService.getForumsByOwner(user.id);
-      console.log('User forums loaded:', userForums.length, userForums);
       setForums(userForums);
     } catch (err) {
       console.error('Error loading user forums:', err);

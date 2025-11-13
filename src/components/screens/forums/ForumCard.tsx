@@ -21,8 +21,6 @@ export const ForumCard: React.FC<ForumCardProps> = ({
   onPress,
   showOwner = true,
 }) => {
-  console.log('ForumCard render:', forum.title, forum);
-  
   const isForumSummary = 'postsCount' in forum;
   const postsCount = isForumSummary ? forum.postsCount : 0;
   const ownerName = isForumSummary ? forum.ownerDisplayName : '';
