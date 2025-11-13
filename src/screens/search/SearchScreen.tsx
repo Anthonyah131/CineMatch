@@ -1,24 +1,16 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   StyleSheet,
-  StatusBar,
-  KeyboardAvoidingView,
-  Platform,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useMovieSearch } from '../../hooks/search/useMovieSearch';
-import { useUserSearch } from '../../hooks/search/useUserSearch';
-import { 
-  SearchInput, 
-  SearchResults, 
-  UserSearchResults,
-  SearchTabs,
-  type SearchTabType 
-} from '../../components/screens/search';
-import { COLORS } from '../../config/colors';
+import { SearchInput, SearchResults, UserSearchResults, ForumSearchResults, SearchTabs } from '../../components/screens/search';
+import { useMovieSearch, useUserSearch, useForumSearch } from '../../hooks/search';
+import type { SearchTabType } from '../../components/screens/search/SearchTabs';
 import type { TmdbMovie } from '../../types/tmdb.types';
 import type { User } from '../../types/user.types';
+import type { ForumSummary } from '../../types/forum.types';
+import { COLORS } from '../../config/colors';
 
 interface SearchScreenProps {
   navigation: any;
@@ -26,60 +18,62 @@ interface SearchScreenProps {
 
 export const SearchScreen: React.FC<SearchScreenProps> = ({ navigation }) => {
   const [activeTab, setActiveTab] = useState<SearchTabType>('movies');
+  const [searchQuery, setSearchQuery] = useState('');
 
-  // Movie search hook
-  const {
-    query: movieQuery,
-    movies,
-    loading: moviesLoading,
-    error: moviesError,
-    hasSearched: hasMoviesSearched,
-    hasMorePages,
-    searchMovies,
-    loadMoreMovies,
-    clearSearch: clearMovieSearch,
-    setQuery: setMovieQuery,
-  } = useMovieSearch();
+  // Hooks de búsqueda
+  const movieSearch = useMovieSearch();
+  const userSearch = useUserSearch();
+  const forumSearch = useForumSearch();
 
-  // User search hook
-  const {
-    query: userQuery,
-    users,
-    loading: usersLoading,
-    error: usersError,
-    hasSearched: hasUsersSearched,
-    searchUsers,
-    clearSearch: clearUserSearch,
-    setQuery: setUserQuery,
-  } = useUserSearch();
-
-  // Unified query state
-  const currentQuery = activeTab === 'movies' ? movieQuery : userQuery;
-  const currentLoading = activeTab === 'movies' ? moviesLoading : usersLoading;
-
-  const handleQueryChange = (text: string) => {
-    if (activeTab === 'movies') {
-      setMovieQuery(text);
+  // Efecto para búsqueda automática con debounce de 1.5 segundos
+  useEffect(() => {
+    if (searchQuery.trim()) {
+      // Ejecutar búsqueda solo en el tab activo
+      switch (activeTab) {
+        case 'movies':
+          movieSearch.searchMovies(searchQuery.trim());
+          break;
+        case 'users':
+          userSearch.searchUsers(searchQuery.trim());
+          break;
+        case 'forums':
+          forumSearch.searchForums(searchQuery.trim());
+          break;
+      }
     } else {
-      setUserQuery(text);
+      // Limpiar todas las búsquedas si no hay query
+      movieSearch.clearSearch();
+      userSearch.clearSearch();
+      forumSearch.clearSearch();
     }
-  };
-
-  const handleClearSearch = () => {
-    if (activeTab === 'movies') {
-      clearMovieSearch();
-    } else {
-      clearUserSearch();
-    }
-  };
+  }, [searchQuery, activeTab]);
 
   const handleTabChange = (tab: SearchTabType) => {
     setActiveTab(tab);
-    // When switching tabs, if the other tab has a different query, sync them
-    if (tab === 'movies' && userQuery && !movieQuery) {
-      setMovieQuery(userQuery);
-    } else if (tab === 'users' && movieQuery && !userQuery) {
-      setUserQuery(movieQuery);
+    // El useEffect se encargará de ejecutar la búsqueda cuando cambie activeTab
+  };
+
+  const handleClearSearch = () => {
+    setSearchQuery('');
+    movieSearch.clearSearch();
+    userSearch.clearSearch();
+    forumSearch.clearSearch();
+  };
+
+  const handleSearchSubmit = () => {
+    if (searchQuery.trim()) {
+      // Ejecutar búsqueda inmediata sin esperar debounce
+      switch (activeTab) {
+        case 'movies':
+          movieSearch.searchMovies(searchQuery.trim());
+          break;
+        case 'users':
+          userSearch.searchUsers(searchQuery.trim());
+          break;
+        case 'forums':
+          forumSearch.searchForums(searchQuery.trim());
+          break;
+      }
     }
   };
 
@@ -91,75 +85,78 @@ export const SearchScreen: React.FC<SearchScreenProps> = ({ navigation }) => {
     navigation.navigate('UserProfile', { userId: user.id });
   };
 
-  const handleMovieRetry = () => {
-    if (movieQuery.trim()) {
-      searchMovies(movieQuery);
-    }
+  const handleForumPress = (forum: ForumSummary) => {
+    navigation.navigate('ForumDetails', { forumId: forum.forumId });
   };
 
-  const handleUserRetry = () => {
-    if (userQuery.trim()) {
-      searchUsers(userQuery);
+  const renderResults = () => {
+    switch (activeTab) {
+      case 'movies':
+        return (
+          <SearchResults
+            movies={movieSearch.movies}
+            loading={movieSearch.loading}
+            error={movieSearch.error}
+            hasSearched={movieSearch.hasSearched}
+            onMoviePress={handleMoviePress}
+            onLoadMore={movieSearch.loadMoreMovies}
+            hasMorePages={movieSearch.hasMorePages}
+            onRetry={() => movieSearch.searchMovies(searchQuery)}
+          />
+        );
+      
+      case 'users':
+        return (
+          <UserSearchResults
+            users={userSearch.users}
+            loading={userSearch.loading}
+            error={userSearch.error}
+            hasSearched={userSearch.hasSearched}
+            onUserPress={handleUserPress}
+            onRetry={() => userSearch.searchUsers(searchQuery)}
+          />
+        );
+      
+      case 'forums':
+        return (
+          <ForumSearchResults
+            forums={forumSearch.forums}
+            loading={forumSearch.loading}
+            error={forumSearch.error}
+            hasSearched={forumSearch.hasSearched}
+            onForumPress={handleForumPress}
+          />
+        );
+      
+      default:
+        return null;
     }
   };
 
   return (
-    <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
-      <StatusBar
-        barStyle="light-content"
-        backgroundColor={COLORS.background}
-        translucent={false}
+    <SafeAreaView style={styles.container}>
+      <SearchInput
+        value={searchQuery}
+        onChangeText={setSearchQuery}
+        onClear={handleClearSearch}
+        onSubmitEditing={handleSearchSubmit}
+        placeholder={`Buscar ${
+          activeTab === 'movies' ? 'películas' : 
+          activeTab === 'users' ? 'usuarios' : 'foros'
+        }...`}
       />
       
-      <KeyboardAvoidingView 
-        style={styles.keyboardContainer}
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      >
-        <View style={styles.header}>
-          <SearchInput
-            value={currentQuery}
-            onChangeText={handleQueryChange}
-            onClear={handleClearSearch}
-            loading={currentLoading}
-            placeholder={
-              activeTab === 'movies' 
-                ? 'Buscar películas...' 
-                : 'Buscar usuarios...'
-            }
-          />
-          
-          <SearchTabs
-            activeTab={activeTab}
-            onTabChange={handleTabChange}
-            movieCount={hasMoviesSearched ? movies.length : undefined}
-            userCount={hasUsersSearched ? users.length : undefined}
-          />
-        </View>
+      <SearchTabs
+        activeTab={activeTab}
+        onTabChange={handleTabChange}
+        movieCount={movieSearch.movies.length}
+        userCount={userSearch.users.length}
+        forumCount={forumSearch.forums.length}
+      />
 
-        <View style={styles.content}>
-          {activeTab === 'movies' ? (
-            <SearchResults
-              movies={movies}
-              loading={moviesLoading}
-              error={moviesError}
-              hasSearched={hasMoviesSearched}
-              hasMorePages={hasMorePages}
-              onMoviePress={handleMoviePress}
-              onLoadMore={loadMoreMovies}
-              onRetry={handleMovieRetry}
-            />
-          ) : (
-            <UserSearchResults
-              users={users}
-              loading={usersLoading}
-              error={usersError}
-              hasSearched={hasUsersSearched}
-              onUserPress={handleUserPress}
-              onRetry={handleUserRetry}
-            />
-          )}
-        </View>
-      </KeyboardAvoidingView>
+      <View style={styles.resultsContainer}>
+        {renderResults()}
+      </View>
     </SafeAreaView>
   );
 };
@@ -169,16 +166,7 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: COLORS.background,
   },
-  keyboardContainer: {
+  resultsContainer: {
     flex: 1,
-  },
-  header: {
-    backgroundColor: COLORS.background,
-    borderBottomWidth: 1,
-    borderBottomColor: COLORS.border,
-  },
-  content: {
-    flex: 1,
-    paddingTop: 8,
   },
 });

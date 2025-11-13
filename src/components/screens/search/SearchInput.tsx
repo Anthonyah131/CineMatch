@@ -13,6 +13,7 @@ interface SearchInputProps {
   value: string;
   onChangeText: (text: string) => void;
   onClear: () => void;
+  onSubmitEditing?: () => void;
   placeholder?: string;
   loading?: boolean;
 }
@@ -21,6 +22,7 @@ export const SearchInput: React.FC<SearchInputProps> = ({
   value,
   onChangeText,
   onClear,
+  onSubmitEditing,
   placeholder = 'Buscar películas...',
   loading = false,
 }) => {
@@ -38,6 +40,7 @@ export const SearchInput: React.FC<SearchInputProps> = ({
           style={styles.input}
           value={value}
           onChangeText={onChangeText}
+          onSubmitEditing={onSubmitEditing}
           placeholder={placeholder}
           placeholderTextColor={COLORS.textSecondary}
           autoCapitalize="none"

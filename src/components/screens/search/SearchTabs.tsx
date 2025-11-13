@@ -8,13 +8,14 @@ import {
 import Icon from 'react-native-vector-icons/Ionicons';
 import { COLORS } from '../../../config/colors';
 
-export type SearchTabType = 'movies' | 'users';
+export type SearchTabType = 'movies' | 'users' | 'forums';
 
 interface SearchTabsProps {
   activeTab: SearchTabType;
   onTabChange: (tab: SearchTabType) => void;
   movieCount?: number;
   userCount?: number;
+  forumCount?: number;
 }
 
 export const SearchTabs: React.FC<SearchTabsProps> = ({
@@ -22,6 +23,7 @@ export const SearchTabs: React.FC<SearchTabsProps> = ({
   onTabChange,
   movieCount,
   userCount,
+  forumCount,
 }) => {
   return (
     <View style={styles.container}>
@@ -91,6 +93,42 @@ export const SearchTabs: React.FC<SearchTabsProps> = ({
                 activeTab === 'users' && styles.activeBadgeText,
               ]}>
                 {userCount > 99 ? '99+' : userCount}
+              </Text>
+            </View>
+          )}
+        </View>
+      </TouchableOpacity>
+
+      <TouchableOpacity
+        style={[
+          styles.tab,
+          activeTab === 'forums' && styles.activeTab,
+        ]}
+        onPress={() => onTabChange('forums')}
+        activeOpacity={0.7}
+      >
+        <View style={styles.tabContent}>
+          <Icon 
+            name="chatbubbles-outline" 
+            size={20} 
+            color={activeTab === 'forums' ? COLORS.background : COLORS.textSecondary} 
+          />
+          <Text style={[
+            styles.tabText,
+            activeTab === 'forums' && styles.activeTabText,
+          ]}>
+            Foros
+          </Text>
+          {forumCount !== undefined && forumCount > 0 && (
+            <View style={[
+              styles.badge,
+              activeTab === 'forums' && styles.activeBadge,
+            ]}>
+              <Text style={[
+                styles.badgeText,
+                activeTab === 'forums' && styles.activeBadgeText,
+              ]}>
+                {forumCount > 99 ? '99+' : forumCount}
               </Text>
             </View>
           )}

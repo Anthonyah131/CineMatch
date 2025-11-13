@@ -137,6 +137,15 @@ export default function Sidebar({
           }}
           active={currentScreen === 'Lists'}
         />
+        <SidebarButton
+          title="Mis Foros"
+          icon="chatbubbles-outline"
+          onPress={() => {
+            if (onClose) onClose();
+            navigation.navigate('HomeTab', { screen: 'UserForums' });
+          }}
+          active={currentScreen === 'UserForums'}
+        />
       </ScrollView>
 
       {/* Settings & Logout */}
