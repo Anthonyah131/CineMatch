@@ -9,6 +9,7 @@ import {
 import Icon from 'react-native-vector-icons/Ionicons';
 import { COLORS } from '../../../config/colors';
 import { buildPosterUrl } from '../../../utils/tmdbImageHelpers';
+import { listsService } from '../../../services/listsService';
 import type { List, ListWithOwner } from '../../../types/list.types';
 
 interface ListCardProps {
@@ -22,15 +23,6 @@ export const ListCard: React.FC<ListCardProps> = ({
   onPress,
   onOptionsPress,
 }) => {
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('es-ES', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-    });
-  };
-
   return (
     <TouchableOpacity
       style={styles.card}
@@ -98,7 +90,7 @@ export const ListCard: React.FC<ListCardProps> = ({
           </View>
 
           <Text style={styles.date}>
-            {formatDate(list.updatedAt)}
+            {listsService.formatTimestamp(list.updatedAt)}
           </Text>
         </View>
       </View>

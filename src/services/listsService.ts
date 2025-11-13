@@ -7,6 +7,7 @@ import type {
   UpdateListDto,
   AddListItemDto,
   UpdateListItemDto,
+  FirestoreTimestamp,
 } from '../types/list.types';
 
 /**
@@ -116,6 +117,30 @@ class ListsService {
     const params = new URLSearchParams({ q: query, page: page.toString(), limit: limit.toString() });
     const response = await apiClient.get<{ items: ListWithOwner[]; total: number; page: number; limit: number }>(`${this.baseUrl}/search?${params.toString()}`);
     return response.items;
+  }
+
+  /**
+   * Formatear timestamp
+   */
+  formatTimestamp(timestamp: string | FirestoreTimestamp): string {
+    const date =
+      typeof timestamp === 'string'
+        ? new Date(timestamp)
+        : new Date(timestamp._seconds * 1000);
+
+    const now = new Date();
+    const diff = now.getTime() - date.getTime();
+    const hours = Math.floor(diff / 3600000);
+    const days = Math.floor(diff / 86400000);
+
+    if (hours < 1) return 'Hace unos minutos';
+    if (hours < 24) return `Hace ${hours}h`;
+    if (days < 7) return `Hace ${days}d`;
+
+    return date.toLocaleDateString('es-ES', {
+      month: 'short',
+      day: 'numeric',
+    });
   }
 }
 

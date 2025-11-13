@@ -5,6 +5,14 @@
 export type MediaType = 'movie' | 'tv';
 
 /**
+ * Timestamp de Firestore
+ */
+export interface FirestoreTimestamp {
+  _seconds: number;
+  _nanoseconds: number;
+}
+
+/**
  * Portada de una lista
  */
 export interface ListCover {
@@ -26,8 +34,8 @@ export interface List {
   isPublic: boolean;
   cover: ListCover;
   itemsCount: number;
-  createdAt: string;
-  updatedAt: string;
+  createdAt: string | FirestoreTimestamp;
+  updatedAt: string | FirestoreTimestamp;
 }
 
 /**

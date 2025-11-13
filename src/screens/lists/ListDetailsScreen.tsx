@@ -16,6 +16,8 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import { COLORS } from '../../config/colors';
 import { buildPosterUrl } from '../../utils/tmdbImageHelpers';
 import { useListDetails } from '../../hooks/lists/useListDetails';
+import { useAuth } from '../../context/AuthContext';
+import { listsService } from '../../services/listsService';
 import type { ListItem } from '../../types/list.types';
 
 interface ListDetailsScreenProps {
@@ -29,8 +31,12 @@ interface ListDetailsScreenProps {
 
 export default function ListDetailsScreen({ navigation, route }: ListDetailsScreenProps) {
   const { listId } = route.params;
+  const { user } = useAuth();
   const { list, items, loading, error, refreshing, refresh, removeItem } = useListDetails(listId);
   const [removingItem, setRemovingItem] = useState<string | null>(null);
+
+  // Verificar si el usuario actual es el dueño de la lista
+  const isCurrentUserOwner = list && user ? listsService.isOwner(list, user.id) : false;
 
   const handleMoviePress = (item: ListItem) => {
     navigation.navigate('MovieDetails', { movieId: item.tmdbId });
@@ -115,20 +121,23 @@ export default function ListDetailsScreen({ navigation, route }: ListDetailsScre
         </Text>
       </View>
 
-      <TouchableOpacity
-        style={styles.removeButton}
-        onPress={(e) => {
-          e.stopPropagation();
-          confirmRemoveItem(item);
-        }}
-        disabled={removingItem === item.id}
-      >
-        {removingItem === item.id ? (
-          <ActivityIndicator size="small" color={COLORS.accent} />
-        ) : (
-          <Icon name="close-circle" size={20} color={COLORS.accent} />
-        )}
-      </TouchableOpacity>
+      {/* Solo mostrar botón de eliminar si el usuario es dueño de la lista */}
+      {isCurrentUserOwner && (
+        <TouchableOpacity
+          style={styles.removeButton}
+          onPress={(e) => {
+            e.stopPropagation();
+            confirmRemoveItem(item);
+          }}
+          disabled={removingItem === item.id}
+        >
+          {removingItem === item.id ? (
+            <ActivityIndicator size="small" color={COLORS.accent} />
+          ) : (
+            <Icon name="close-circle" size={20} color={COLORS.accent} />
+          )}
+        </TouchableOpacity>
+      )}
     </TouchableOpacity>
   );
 
@@ -137,15 +146,21 @@ export default function ListDetailsScreen({ navigation, route }: ListDetailsScre
       <Icon name="film-outline" size={80} color={COLORS.primary} />
       <Text style={styles.emptyTitle}>Lista vacía</Text>
       <Text style={styles.emptySubtitle}>
-        Agrega películas para comenzar a construir tu lista
+        {isCurrentUserOwner 
+          ? 'Agrega películas para comenzar a construir tu lista'
+          : 'Esta lista no tiene películas aún'
+        }
       </Text>
-      <TouchableOpacity
-        style={styles.addMoviesButton}
-        onPress={handleAddMovies}
-      >
-        <Icon name="search" size={20} color={COLORS.background} />
-        <Text style={styles.addMoviesText}>Buscar Películas</Text>
-      </TouchableOpacity>
+      {/* Solo mostrar botón de agregar si el usuario es dueño */}
+      {isCurrentUserOwner && (
+        <TouchableOpacity
+          style={styles.addMoviesButton}
+          onPress={handleAddMovies}
+        >
+          <Icon name="search" size={20} color={COLORS.background} />
+          <Text style={styles.addMoviesText}>Buscar Películas</Text>
+        </TouchableOpacity>
+      )}
     </View>
   );
 
@@ -210,13 +225,16 @@ export default function ListDetailsScreen({ navigation, route }: ListDetailsScre
             </View>
           </View>
 
-          <TouchableOpacity
-            style={styles.addButton}
-            onPress={handleAddMovies}
-          >
-            <Icon name="add" size={18} color={COLORS.background} />
-            <Text style={styles.addButtonText}>Agregar Películas</Text>
-          </TouchableOpacity>
+          {/* Solo mostrar botón de agregar si el usuario es dueño */}
+          {isCurrentUserOwner && (
+            <TouchableOpacity
+              style={styles.addButton}
+              onPress={handleAddMovies}
+            >
+              <Icon name="add" size={18} color={COLORS.background} />
+              <Text style={styles.addButtonText}>Agregar Películas</Text>
+            </TouchableOpacity>
+          )}
         </View>
       </View>
     );
