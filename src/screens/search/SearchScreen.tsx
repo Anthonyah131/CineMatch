@@ -25,32 +25,37 @@ export const SearchScreen: React.FC<SearchScreenProps> = ({ navigation }) => {
   const userSearch = useUserSearch();
   const forumSearch = useForumSearch();
 
-  // Efecto para búsqueda automática con debounce de 1.5 segundos
+  // Efecto para sincronizar query con los hooks
   useEffect(() => {
-    if (searchQuery.trim()) {
-      // Ejecutar búsqueda solo en el tab activo
-      switch (activeTab) {
-        case 'movies':
-          movieSearch.searchMovies(searchQuery.trim());
-          break;
-        case 'users':
-          userSearch.searchUsers(searchQuery.trim());
-          break;
-        case 'forums':
-          forumSearch.searchForums(searchQuery.trim());
-          break;
-      }
-    } else {
-      // Limpiar todas las búsquedas si no hay query
-      movieSearch.clearSearch();
-      userSearch.clearSearch();
-      forumSearch.clearSearch();
+    // Solo actualizar el hook del tab activo
+    switch (activeTab) {
+      case 'forums':
+        forumSearch.setQuery(searchQuery);
+        break;
+      case 'users':
+        userSearch.setQuery(searchQuery);
+        break;
+      // Para movies mantener la lógica anterior por ahora
     }
   }, [searchQuery, activeTab]);
 
   const handleTabChange = (tab: SearchTabType) => {
     setActiveTab(tab);
-    // El useEffect se encargará de ejecutar la búsqueda cuando cambie activeTab
+    
+    // Activar la búsqueda en el nuevo tab si hay query
+    if (searchQuery.trim()) {
+      switch (tab) {
+        case 'movies':
+          movieSearch.searchMovies(searchQuery.trim());
+          break;
+        case 'users':
+          userSearch.setQuery(searchQuery);
+          break;
+        case 'forums':
+          forumSearch.setQuery(searchQuery);
+          break;
+      }
+    }
   };
 
   const handleClearSearch = () => {
@@ -140,9 +145,9 @@ export const SearchScreen: React.FC<SearchScreenProps> = ({ navigation }) => {
         onChangeText={setSearchQuery}
         onClear={handleClearSearch}
         onSubmitEditing={handleSearchSubmit}
-        placeholder={`Buscar ${
-          activeTab === 'movies' ? 'películas' : 
-          activeTab === 'users' ? 'usuarios' : 'foros'
+        placeholder={`Search ${
+          activeTab === 'movies' ? 'movies' : 
+          activeTab === 'users' ? 'users' : 'forums'
         }...`}
       />
       

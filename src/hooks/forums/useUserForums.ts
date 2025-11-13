@@ -1,10 +1,10 @@
 import { useState, useEffect, useCallback } from 'react';
 import { forumsService } from '../../services/forumsService';
 import { useAuth } from '../../context/AuthContext';
-import type { Forum } from '../../types/forum.types';
+import type { Forum, ForumSummary } from '../../types/forum.types';
 
 export interface UseUserForumsReturn {
-  forums: Forum[];
+  forums: ForumSummary[];
   loading: boolean;
   error: string | null;
   refreshing: boolean;
@@ -15,7 +15,7 @@ export interface UseUserForumsReturn {
 }
 
 export const useUserForums = (): UseUserForumsReturn => {
-  const [forums, setForums] = useState<Forum[]>([]);
+  const [forums, setForums] = useState<ForumSummary[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);
@@ -36,7 +36,8 @@ export const useUserForums = (): UseUserForumsReturn => {
       }
       setError(null);
 
-      const userForums = await forumsService.getUserForums(user.id);
+      const userForums = await forumsService.getForumsByOwner(user.id);
+      console.log('User forums loaded:', userForums.length, userForums);
       setForums(userForums);
     } catch (err) {
       console.error('Error loading user forums:', err);
@@ -60,20 +61,21 @@ export const useUserForums = (): UseUserForumsReturn => {
     try {
       setError(null);
       const newForum = await forumsService.createForum(title.trim(), description.trim());
-      setForums(prev => [newForum, ...prev]);
+      // Recargar la lista ya que el servidor devuelve Forum pero necesitamos ForumSummary
+      await loadForums();
       return true;
     } catch (err) {
       console.error('Error creating forum:', err);
       setError('Error al crear el foro. Intenta de nuevo.');
       return false;
     }
-  }, []);
+  }, [loadForums]);
 
   const deleteForum = useCallback(async (forumId: string): Promise<boolean> => {
     try {
       setError(null);
       await forumsService.deleteForum(forumId);
-      setForums(prev => prev.filter(forum => forum.id !== forumId));
+      setForums(prev => prev.filter(forum => forum.forumId !== forumId));
       return true;
     } catch (err) {
       console.error('Error deleting forum:', err);
@@ -94,14 +96,17 @@ export const useUserForums = (): UseUserForumsReturn => {
 
     try {
       setError(null);
-      const updatedForum = await forumsService.updateForum(forumId, {
+      await forumsService.updateForum(forumId, {
         title: title.trim(),
         description: description.trim(),
       });
       
+      // Actualizar localmente el ForumSummary
       setForums(prev => 
         prev.map(forum => 
-          forum.id === forumId ? updatedForum : forum
+          forum.forumId === forumId 
+            ? { ...forum, title: title.trim(), description: description.trim() }
+            : forum
         )
       );
       return true;

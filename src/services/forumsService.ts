@@ -227,6 +227,24 @@ class ForumsService {
   ): string | null {
     return reactions[myUserId] || null;
   }
+
+  /**
+   * Buscar foros por título o nombre del dueño
+   */
+  async searchForums(query: string, page: number = 1, limit: number = 20): Promise<ForumSummary[]> {
+    const params = new URLSearchParams({ q: query, page: page.toString(), limit: limit.toString() });
+    const response = await apiClient.get<{ items: ForumSummary[]; total: number; page: number; limit: number }>(`${this.baseUrl}/search?${params.toString()}`);
+    return response.items;
+  }
+
+  /**
+   * Obtener foros por usuario (owner)
+   */
+  async getForumsByOwner(ownerId: string, page: number = 1, limit: number = 20): Promise<ForumSummary[]> {
+    const params = new URLSearchParams({ page: page.toString(), limit: limit.toString() });
+    const response = await apiClient.get<{ items: ForumSummary[]; total: number; page: number; limit: number }>(`${this.baseUrl}/owner/${ownerId}?${params.toString()}`);
+    return response.items;
+  }
 }
 
 export const forumsService = new ForumsService();

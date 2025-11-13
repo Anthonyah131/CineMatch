@@ -138,7 +138,7 @@ export default function Sidebar({
           active={currentScreen === 'Lists'}
         />
         <SidebarButton
-          title="Mis Foros"
+          title="Forums"
           icon="chatbubbles-outline"
           onPress={() => {
             if (onClose) onClose();

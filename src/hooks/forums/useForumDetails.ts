@@ -70,7 +70,7 @@ export const useForumDetails = (forumId: string): UseForumDetailsReturn => {
       const newPostWithAuthor: PostWithAuthor = {
         ...newPost,
         authorDisplayName: user?.name || 'Usuario',
-        authorPhotoUrl: user?.photoUrl || '',
+        authorPhotoURL: user?.photoUrl || '',
         commentsCount: 0,
       };
 

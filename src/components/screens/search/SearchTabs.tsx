@@ -45,7 +45,7 @@ export const SearchTabs: React.FC<SearchTabsProps> = ({
             styles.tabText,
             activeTab === 'movies' && styles.activeTabText,
           ]}>
-            Películas
+            Movies
           </Text>
           {movieCount !== undefined && movieCount > 0 && (
             <View style={[
@@ -81,7 +81,7 @@ export const SearchTabs: React.FC<SearchTabsProps> = ({
             styles.tabText,
             activeTab === 'users' && styles.activeTabText,
           ]}>
-            Usuarios
+            Users
           </Text>
           {userCount !== undefined && userCount > 0 && (
             <View style={[
@@ -117,7 +117,7 @@ export const SearchTabs: React.FC<SearchTabsProps> = ({
             styles.tabText,
             activeTab === 'forums' && styles.activeTabText,
           ]}>
-            Foros
+            Forums
           </Text>
           {forumCount !== undefined && forumCount > 0 && (
             <View style={[

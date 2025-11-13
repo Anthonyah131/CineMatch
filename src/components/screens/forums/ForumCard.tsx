@@ -21,6 +21,8 @@ export const ForumCard: React.FC<ForumCardProps> = ({
   onPress,
   showOwner = true,
 }) => {
+  console.log('ForumCard render:', forum.title, forum);
+  
   const isForumSummary = 'postsCount' in forum;
   const postsCount = isForumSummary ? forum.postsCount : 0;
   const ownerName = isForumSummary ? forum.ownerDisplayName : '';
@@ -28,9 +30,10 @@ export const ForumCard: React.FC<ForumCardProps> = ({
     ? forumsService.formatTimestamp(forum.lastPostAt)
     : null;
 
-  const createdAt = isForumSummary 
-    ? forumsService.formatTimestamp((forum as any).createdAt || new Date().toISOString())
-    : forumsService.formatTimestamp(forum.createdAt);
+  // Solo mostrar fecha de creación para Forum completo, no para ForumSummary
+  const createdAt = !isForumSummary 
+    ? forumsService.formatTimestamp(forum.createdAt)
+    : null;
 
   return (
     <TouchableOpacity 
@@ -67,12 +70,19 @@ export const ForumCard: React.FC<ForumCardProps> = ({
       </Text>
 
       <View style={styles.footer}>
-        <Text style={styles.timestamp}>
-          Creado {createdAt}
-        </Text>
+        {createdAt && (
+          <Text style={styles.timestamp}>
+            Creado {createdAt}
+          </Text>
+        )}
         {lastPostAt && (
           <Text style={styles.lastActivity}>
             Último post {lastPostAt}
+          </Text>
+        )}
+        {!createdAt && !lastPostAt && (
+          <Text style={styles.timestamp}>
+            {postsCount} {postsCount === 1 ? 'post' : 'posts'}
           </Text>
         )}
       </View>

@@ -32,13 +32,10 @@ export const useForumSearch = (): UseForumSearchReturn => {
     setError(null);
 
     try {
-      // Obtener todos los foros y filtrar localmente
-      const allForums = await forumsService.getAllForums(100);
-      const filteredForums = allForums.filter(forum => 
-        forum.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        forum.description.toLowerCase().includes(searchQuery.toLowerCase())
-      );
+      // Usar el nuevo método del servicio para buscar en el servidor
+      const filteredForums = await forumsService.searchForums(searchQuery.trim());
       
+      console.log('Forum search results:', filteredForums.length, filteredForums);
       setForums(filteredForums);
       setHasSearched(true);
     } catch (err) {
@@ -57,18 +54,23 @@ export const useForumSearch = (): UseForumSearchReturn => {
     setError(null);
   }, []);
 
-  // Auto search with debounce effect
+  // Auto search with debounce effect - solo cuando query cambia internamente
   useEffect(() => {
+    if (!query) {
+      setForums([]);
+      setHasSearched(false);
+      setError(null);
+      return;
+    }
+
     const timeoutId = setTimeout(() => {
       if (query.trim().length >= 2) {
         searchForums(query);
-      } else if (query.trim().length === 0) {
-        clearSearch();
       }
     }, 1500);
 
     return () => clearTimeout(timeoutId);
-  }, [query, searchForums, clearSearch]);
+  }, [query, searchForums]);
     
   return {
     query,

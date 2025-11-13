@@ -15,7 +15,7 @@ import { ForumCard } from '../../components/screens/forums/ForumCard';
 import { CreateForumModal } from '../../components/screens/forums/CreateForumModal';
 import { useUserForums } from '../../hooks/forums/useUserForums';
 import { COLORS } from '../../config/colors';
-import type { Forum } from '../../types/forum.types';
+import type { ForumSummary } from '../../types/forum.types';
 
 interface UserForumsScreenProps {
   navigation: any;
@@ -43,11 +43,11 @@ export const UserForumsScreen: React.FC<UserForumsScreenProps> = ({
     return success;
   };
 
-  const handleForumPress = (forum: Forum) => {
-    navigation.navigate('ForumDetails', { forumId: forum.id });
+  const handleForumPress = (forum: ForumSummary) => {
+    navigation.navigate('ForumDetails', { forumId: forum.forumId });
   };
 
-  const handleDeleteForum = (forum: Forum) => {
+  const handleDeleteForum = (forum: ForumSummary) => {
     Alert.alert(
       'Eliminar foro',
       `¿Estás seguro de que quieres eliminar "${forum.title}"? Esta acción no se puede deshacer.`,
@@ -56,7 +56,7 @@ export const UserForumsScreen: React.FC<UserForumsScreenProps> = ({
         {
           text: 'Eliminar',
           style: 'destructive',
-          onPress: () => deleteForum(forum.id),
+          onPress: () => deleteForum(forum.forumId),
         },
       ]
     );
@@ -103,7 +103,7 @@ export const UserForumsScreen: React.FC<UserForumsScreenProps> = ({
     </View>
   );
 
-  const renderForumItem = ({ item }: { item: Forum }) => (
+  const renderForumItem = ({ item }: { item: ForumSummary }) => (
     <View>
       <ForumCard
         forum={item}
@@ -142,7 +142,7 @@ export const UserForumsScreen: React.FC<UserForumsScreenProps> = ({
       ) : (
         <FlatList
           data={forums}
-          keyExtractor={(item) => item.id}
+          keyExtractor={(item) => item.forumId}
           renderItem={renderForumItem}
           contentContainerStyle={[
             styles.listContainer,

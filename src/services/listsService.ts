@@ -103,6 +103,18 @@ class ListsService {
   isOwner(list: List, userId: string): boolean {
     return list.ownerId === userId;
   }
+
+  /**
+   * Buscar listas públicas por nombre
+   */
+  async searchPublicLists(
+    query: string,
+    page: number = 1,
+    limit: number = 20,
+  ): Promise<List[]> {
+    const params = new URLSearchParams({ q: query, page: page.toString(), limit: limit.toString() });
+    return apiClient.get<List[]>(`${this.baseUrl}/search?${params.toString()}`);
+  }
 }
 
 export const listsService = new ListsService();

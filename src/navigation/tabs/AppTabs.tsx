@@ -64,7 +64,7 @@ export default function AppTabs() {
       <Tab.Screen
         name="SearchTab"
         component={SearchScreen}
-        options={{ tabBarLabel: 'Buscar' }}
+        options={{ tabBarLabel: 'Search' }}
       />
       <Tab.Screen
         name="HomeTab"
