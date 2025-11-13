@@ -7,6 +7,7 @@ interface MovieActionsProps {
   isFavorite: boolean;
   onToggleFavorite: () => void;
   onAddToWatchlist?: () => void;
+  onAddToList?: () => void;
   onShare?: () => void;
   onWriteReview?: () => void;
 }
@@ -15,6 +16,7 @@ export function MovieActions({
   isFavorite,
   onToggleFavorite,
   onAddToWatchlist,
+  onAddToList,
   onShare,
   onWriteReview,
 }: MovieActionsProps) {
@@ -30,6 +32,10 @@ export function MovieActions({
 
       <TouchableOpacity style={styles.actionButton} onPress={onAddToWatchlist}>
         <Icon name="bookmark-outline" size={20} color={COLORS.primary} />
+      </TouchableOpacity>
+
+      <TouchableOpacity style={styles.actionButton} onPress={onAddToList}>
+        <Icon name="list-outline" size={20} color={COLORS.primary} />
       </TouchableOpacity>
 
       <TouchableOpacity style={styles.actionButton} onPress={onWriteReview}>

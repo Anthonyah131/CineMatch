@@ -25,6 +25,7 @@ import {
   MovieDetailsTab,
   type MovieTab,
 } from '../../components/screens/movie-details';
+import { AddToListModal } from '../../components/screens/lists';
 import ReviewsList from '../../components/movies/ReviewsList';
 import { buildPosterUrl } from '../../utils/tmdbImageHelpers';
 import { COLORS } from '../../config/colors';
@@ -47,6 +48,7 @@ export default function MovieDetailsScreen({
   const [activeTab, setActiveTab] = useState<MovieTab>('cast');
   const [reviewsData, setReviewsData] = useState<MediaDetailsWithReviews | null>(null);
   const [loadingReviews, setLoadingReviews] = useState(false);
+  const [addToListModalVisible, setAddToListModalVisible] = useState(false);
 
   const {
     movieDetails,
@@ -75,6 +77,10 @@ export default function MovieDetailsScreen({
 
   const handleWriteReview = () => {
     navigation.navigate('WriteReview', { movieDetails });
+  };
+
+  const handleAddToList = () => {
+    setAddToListModalVisible(true);
   };
 
   const handleUserPress = (userId: string) => {
@@ -214,6 +220,7 @@ export default function MovieDetailsScreen({
               isFavorite={isFavorite}
               onToggleFavorite={toggleFavorite}
               onAddToWatchlist={handleAddToWatchlist}
+              onAddToList={handleAddToList}
               onWriteReview={handleWriteReview}
               onShare={handleShare}
             />
@@ -269,6 +276,15 @@ export default function MovieDetailsScreen({
         {/* Bottom padding */}
         <View style={styles.bottomPadding} />
       </ScrollView>
+
+      <AddToListModal
+        visible={addToListModalVisible}
+        movie={movieDetails}
+        onClose={() => setAddToListModalVisible(false)}
+        onSuccess={() => {
+          // Opcional: mostrar mensaje de éxito
+        }}
+      />
     </View>
   );
 }

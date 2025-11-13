@@ -7,6 +7,8 @@ import DiaryScreen from '../../screens/diary/DiaryScreen';
 import LogDetailScreen from '../../screens/diary/LogDetailScreen';
 import FollowListScreen from '../../screens/profile/FollowListScreen';
 import UserProfileScreen from '../../screens/profile/UserProfileScreen';
+import ListsScreen from '../../screens/lists/ListsScreen';
+import ListDetailsScreen from '../../screens/lists/ListDetailsScreen';
 import type { FollowListType } from '../../hooks/profile/useFollowList';
 
 /**
@@ -17,6 +19,8 @@ import type { FollowListType } from '../../hooks/profile/useFollowList';
  * - Matches: Pantalla de matches con usuarios que vieron películas similares
  * - Diary: Diario de logs de visualización
  * - LogDetail: Detalles de un log específico
+ * - Lists: Listas de películas del usuario
+ * - ListDetails: Detalles de una lista específica
  * - FollowList: Lista de seguidores o seguidos de un usuario
  * - UserProfile: Perfil de otro usuario
  * - MovieDetails: Detalles de película (compartido con RootNavigator)
@@ -26,6 +30,8 @@ export type HomeStackParamList = {
   Matches: undefined;
   Diary: undefined;
   LogDetail: { logId: string };
+  Lists: undefined;
+  ListDetails: { listId: string };
   FollowList: { type: FollowListType; userId: string };
   UserProfile: { userId: string };
   MovieDetails: { movieId: number };
@@ -49,6 +55,22 @@ export default function HomeStack() {
       <Stack.Screen 
         name="LogDetail" 
         component={LogDetailScreen}
+        options={{
+          presentation: 'card',
+          animation: 'slide_from_right',
+        }}
+      />
+      <Stack.Screen 
+        name="Lists" 
+        component={ListsScreen}
+        options={{
+          presentation: 'card',
+          animation: 'slide_from_right',
+        }}
+      />
+      <Stack.Screen 
+        name="ListDetails" 
+        component={ListDetailsScreen}
         options={{
           presentation: 'card',
           animation: 'slide_from_right',
