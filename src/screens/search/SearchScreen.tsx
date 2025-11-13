@@ -29,8 +29,11 @@ export const SearchScreen: React.FC<SearchScreenProps> = ({ navigation }) => {
 
   // Efecto para sincronizar query con los hooks
   useEffect(() => {
-    // Solo actualizar el hook del tab activo
+    // Actualizar el hook del tab activo
     switch (activeTab) {
+      case 'movies':
+        movieSearch.setQuery(searchQuery);
+        break;
       case 'forums':
         forumSearch.setQuery(searchQuery);
         break;
@@ -40,7 +43,6 @@ export const SearchScreen: React.FC<SearchScreenProps> = ({ navigation }) => {
       case 'lists':
         listSearch.setQuery(searchQuery);
         break;
-      // Para movies mantener la lógica anterior por ahora
     }
   }, [searchQuery, activeTab]);
 
@@ -51,7 +53,7 @@ export const SearchScreen: React.FC<SearchScreenProps> = ({ navigation }) => {
     if (searchQuery.trim()) {
       switch (tab) {
         case 'movies':
-          movieSearch.searchMovies(searchQuery.trim());
+          movieSearch.setQuery(searchQuery);
           break;
         case 'users':
           userSearch.setQuery(searchQuery);

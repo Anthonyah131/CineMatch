@@ -4,6 +4,7 @@ import {
   TouchableOpacity,
   Text,
   StyleSheet,
+  ScrollView,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { COLORS } from '../../../config/colors';
@@ -27,158 +28,86 @@ export const SearchTabs: React.FC<SearchTabsProps> = ({
   forumCount,
   listCount,
 }) => {
+  const tabs = [
+    {
+      key: 'movies' as SearchTabType,
+      icon: 'film-outline',
+      label: 'Películas',
+      count: movieCount,
+    },
+    {
+      key: 'users' as SearchTabType,
+      icon: 'people-outline',
+      label: 'Usuarios',
+      count: userCount,
+    },
+    {
+      key: 'forums' as SearchTabType,
+      icon: 'chatbubbles-outline',
+      label: 'Foros',
+      count: forumCount,
+    },
+    {
+      key: 'lists' as SearchTabType,
+      icon: 'list-outline',
+      label: 'Listas',
+      count: listCount,
+    },
+  ];
+
   return (
     <View style={styles.container}>
-      <TouchableOpacity
-        style={[
-          styles.tab,
-          activeTab === 'movies' && styles.activeTab,
-        ]}
-        onPress={() => onTabChange('movies')}
-        activeOpacity={0.7}
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={styles.scrollContent}
+        style={styles.scrollView}
       >
-        <View style={styles.tabContent}>
-          <Icon 
-            name="film-outline" 
-            size={20} 
-            color={activeTab === 'movies' ? COLORS.background : COLORS.textSecondary} 
-          />
-          <Text style={[
-            styles.tabText,
-            activeTab === 'movies' && styles.activeTabText,
-          ]}>
-            Movies
-          </Text>
-          {movieCount !== undefined && movieCount > 0 && (
-            <View style={[
-              styles.badge,
-              activeTab === 'movies' && styles.activeBadge,
-            ]}>
+        {tabs.map((tab) => (
+          <TouchableOpacity
+            key={tab.key}
+            style={[
+              styles.tab,
+              activeTab === tab.key && styles.activeTab,
+            ]}
+            onPress={() => onTabChange(tab.key)}
+            activeOpacity={0.7}
+          >
+            <View style={styles.tabContent}>
+              <Icon 
+                name={tab.icon} 
+                size={18} 
+                color={activeTab === tab.key ? COLORS.background : COLORS.textSecondary} 
+              />
               <Text style={[
-                styles.badgeText,
-                activeTab === 'movies' && styles.activeBadgeText,
+                styles.tabText,
+                activeTab === tab.key && styles.activeTabText,
               ]}>
-                {movieCount > 99 ? '99+' : movieCount}
+                {tab.label}
               </Text>
+              {tab.count !== undefined && tab.count > 0 && (
+                <View style={[
+                  styles.badge,
+                  activeTab === tab.key && styles.activeBadge,
+                ]}>
+                  <Text style={[
+                    styles.badgeText,
+                    activeTab === tab.key && styles.activeBadgeText,
+                  ]}>
+                    {tab.count > 99 ? '99+' : tab.count}
+                  </Text>
+                </View>
+              )}
             </View>
-          )}
-        </View>
-      </TouchableOpacity>
-
-      <TouchableOpacity
-        style={[
-          styles.tab,
-          activeTab === 'users' && styles.activeTab,
-        ]}
-        onPress={() => onTabChange('users')}
-        activeOpacity={0.7}
-      >
-        <View style={styles.tabContent}>
-          <Icon 
-            name="people-outline" 
-            size={20} 
-            color={activeTab === 'users' ? COLORS.background : COLORS.textSecondary} 
-          />
-          <Text style={[
-            styles.tabText,
-            activeTab === 'users' && styles.activeTabText,
-          ]}>
-            Users
-          </Text>
-          {userCount !== undefined && userCount > 0 && (
-            <View style={[
-              styles.badge,
-              activeTab === 'users' && styles.activeBadge,
-            ]}>
-              <Text style={[
-                styles.badgeText,
-                activeTab === 'users' && styles.activeBadgeText,
-              ]}>
-                {userCount > 99 ? '99+' : userCount}
-              </Text>
-            </View>
-          )}
-        </View>
-      </TouchableOpacity>
-
-      <TouchableOpacity
-        style={[
-          styles.tab,
-          activeTab === 'forums' && styles.activeTab,
-        ]}
-        onPress={() => onTabChange('forums')}
-        activeOpacity={0.7}
-      >
-        <View style={styles.tabContent}>
-          <Icon 
-            name="chatbubbles-outline" 
-            size={20} 
-            color={activeTab === 'forums' ? COLORS.background : COLORS.textSecondary} 
-          />
-          <Text style={[
-            styles.tabText,
-            activeTab === 'forums' && styles.activeTabText,
-          ]}>
-            Foros
-          </Text>
-          {forumCount !== undefined && forumCount > 0 && (
-            <View style={[
-              styles.badge,
-              activeTab === 'forums' && styles.activeBadge,
-            ]}>
-              <Text style={[
-                styles.badgeText,
-                activeTab === 'forums' && styles.activeBadgeText,
-              ]}>
-                {forumCount > 99 ? '99+' : forumCount}
-              </Text>
-            </View>
-          )}
-        </View>
-      </TouchableOpacity>
-
-      <TouchableOpacity
-        style={[
-          styles.tab,
-          activeTab === 'lists' && styles.activeTab,
-        ]}
-        onPress={() => onTabChange('lists')}
-        activeOpacity={0.7}
-      >
-        <View style={styles.tabContent}>
-          <Icon 
-            name="list-outline" 
-            size={20} 
-            color={activeTab === 'lists' ? COLORS.background : COLORS.textSecondary} 
-          />
-          <Text style={[
-            styles.tabText,
-            activeTab === 'lists' && styles.activeTabText,
-          ]}>
-            Listas
-          </Text>
-          {listCount !== undefined && listCount > 0 && (
-            <View style={[
-              styles.badge,
-              activeTab === 'lists' && styles.activeBadge,
-            ]}>
-              <Text style={[
-                styles.badgeText,
-                activeTab === 'lists' && styles.activeBadgeText,
-              ]}>
-                {listCount > 99 ? '99+' : listCount}
-              </Text>
-            </View>
-          )}
-        </View>
-      </TouchableOpacity>
+          </TouchableOpacity>
+        ))}
+      </ScrollView>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    flexDirection: 'row',
     backgroundColor: COLORS.surface,
     marginHorizontal: 16,
     marginVertical: 8,
@@ -190,43 +119,51 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 2,
   },
+  scrollView: {
+    flexGrow: 0,
+  },
+  scrollContent: {
+    paddingHorizontal: 4,
+    gap: 8,
+  },
   tab: {
-    flex: 1,
-    paddingVertical: 12,
-    paddingHorizontal: 16,
+    paddingVertical: 10,
+    paddingHorizontal: 12,
     borderRadius: 8,
     backgroundColor: 'transparent',
+    minWidth: 80,
   },
   activeTab: {
     backgroundColor: COLORS.primary,
   },
   tabContent: {
-    flexDirection: 'row',
+    flexDirection: 'column',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 8,
+    gap: 4,
   },
   tabText: {
-    fontSize: 14,
+    fontSize: 12,
     fontWeight: '600',
     color: COLORS.textSecondary,
+    textAlign: 'center',
   },
   activeTabText: {
     color: COLORS.background,
   },
   badge: {
     backgroundColor: COLORS.primary,
-    borderRadius: 12,
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-    minWidth: 20,
+    borderRadius: 10,
+    paddingHorizontal: 6,
+    paddingVertical: 1,
+    minWidth: 18,
     alignItems: 'center',
   },
   activeBadge: {
     backgroundColor: COLORS.background,
   },
   badgeText: {
-    fontSize: 11,
+    fontSize: 10,
     fontWeight: '700',
     color: COLORS.background,
   },
