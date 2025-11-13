@@ -38,9 +38,9 @@ export default function ListDetailsScreen({ navigation, route }: ListDetailsScre
 
   const handleAddMovies = () => {
     // Navegar a la pantalla de búsqueda con un parámetro para saber que debe agregar a esta lista
-    navigation.navigate('Search', {
+    navigation.navigate('SearchTab', {
       screen: 'SearchMain',
-      params: { addToListId: listId }
+      params: { addToListId: listId },
     });
   };
 
