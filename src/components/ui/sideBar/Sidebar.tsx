@@ -133,6 +133,7 @@ export default function Sidebar({
           icon="list-outline"
           onPress={() => {
             if (onClose) onClose();
+            navigation.navigate('HomeTab', { screen: 'Lists' });
           }}
           active={currentScreen === 'Lists'}
         />
