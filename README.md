@@ -6,6 +6,12 @@
 
 **A modern social platform for movie enthusiasts to discover films, track their cinematic journey, and connect with fellow movie lovers.**
 
+<p align="center">
+  <a href="https://github.com/Anthonyah131/CineMatch-Backend">
+    👉 BackEnd Repository (NestJS)
+  </a>
+</p>
+
 [![React Native](https://img.shields.io/badge/React_Native-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)](https://reactnative.dev/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![Firebase](https://img.shields.io/badge/Firebase-FFCA28?style=for-the-badge&logo=firebase&logoColor=black)](https://firebase.google.com/)
